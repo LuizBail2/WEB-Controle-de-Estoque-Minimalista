@@ -9,6 +9,7 @@
 
 
 ## WEB-Controle-de-Estoque-de-Eletrônicos
+Feito para pequenos comerciantes de eletrônicos para facilitar a gerência de estoque de seus produtos, tendo assim um controle maior sobre seus negocios.
 
 
 ## 👨‍💻 Autor
@@ -32,9 +33,15 @@
 
 # 🛠️ Como Rodar o Projeto
 ## Clone o projeto
-https://github.com/LuizBail2/WEB-Controle-de-Estoque-Minimalista
+git clone https://github.com/LuizBail2/WEB-Controle-de-Estoque-Minimalista
 
-## Rodar o app
+# Entre na pasta
+cd WEB-Controle-de-Estoque-Minimalista
+
+## Instalar as dependências do PHP
+composer install
+
+## Iniciar o servidor
 Execute o projeto com 'php artisan serve'
 
 
