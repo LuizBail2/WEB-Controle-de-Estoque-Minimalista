@@ -47,12 +47,12 @@ cd WEB-Controle-de-Estoque-Minimalista
 copy .env.example .env
 
 ## Configure o Banco de Dados
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=estoque
-DB_USERNAME=root
-DB_PASSWORD=
+1. DB_CONNECTION=mysql
+2. DB_HOST=127.0.0.1
+3. DB_PORT=3306
+4. DB_DATABASE=estoque
+5. DB_USERNAME=root
+6. DB_PASSWORD=
 
 ## Gere a chave do Laravel
 'php artisan key:generate'
