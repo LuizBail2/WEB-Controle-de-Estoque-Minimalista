@@ -32,6 +32,8 @@ Feito para pequenos comerciantes de eletrônicos para facilitar a gerência de e
 
 
 # 🛠️ Como Rodar o Projeto
+Entre no CMD
+
 ## Clone o projeto
 git clone https://github.com/LuizBail2/WEB-Controle-de-Estoque-Minimalista
 
@@ -39,7 +41,24 @@ git clone https://github.com/LuizBail2/WEB-Controle-de-Estoque-Minimalista
 cd WEB-Controle-de-Estoque-Minimalista
 
 ## Instalar as dependências do PHP
-composer install
+'composer install'
+
+## Criar o arquivo .env
+copy .env.example .env
+
+## Configure o Banco de Dados
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=estoque
+DB_USERNAME=root
+DB_PASSWORD=
+
+## Gere a chave do Laravel
+'php artisan key:generate'
+
+## Rode as migrations
+'php artisan migrate'
 
 ## Iniciar o servidor
 Execute o projeto com 'php artisan serve'
