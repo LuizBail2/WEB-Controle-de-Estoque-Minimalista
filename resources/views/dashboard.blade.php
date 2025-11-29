@@ -16,7 +16,7 @@
 
     <div class="col-md-4 mb-3">
         <div class="card p-3 shadow-sm">
-            <h6>Estoque baixo</h6>
+            <h6>Produtos com Estoque baixo</h6>
             <h2>{{ \App\Models\Product::whereColumn('quantity','<=','minimum_quantity')->count() }}</h2>
         </div>
     </div>
