@@ -28,7 +28,8 @@ Feito para pequenos comerciantes de eletrônicos para facilitar a gerência de e
 ## 🚀 Tecnologias Utilizadas
 1. Framework Laravel
 2. VS Code.
-3. Arquitetura com Controller, Seeders e Models.
+3. XAMP
+4. Arquitetura com Controller, Seeders e Models.
 
 
 # 🛠️ Como Rodar o Projeto
