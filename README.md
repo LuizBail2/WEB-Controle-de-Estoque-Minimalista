@@ -29,7 +29,8 @@ Feito para pequenos comerciantes de eletrônicos para facilitar a gerência de e
 1. Framework Laravel
 2. VS Code.
 3. XAMP
-4. Arquitetura com Controller, Seeders e Models.
+4. PhPMySql
+5. Arquitetura com Controller, Seeders e Models.
 
 
 # 🛠️ Como Rodar o Projeto
