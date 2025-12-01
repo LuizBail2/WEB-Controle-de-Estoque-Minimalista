@@ -37,7 +37,7 @@
     </div>
 
     <button class="btn btn-primary">Salvar</button>
-    <a href="{{ route('products.index') }}" class="btn btn-secondary">Cancelar</a>
+    <a href="{{ route('dashboard') }}" class="btn btn-secondary">Cancelar</a>
 
 </form>
 

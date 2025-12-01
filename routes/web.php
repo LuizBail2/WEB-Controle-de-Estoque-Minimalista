@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
@@ -15,4 +16,9 @@ Route::middleware('auth')->group(function () {
         return view('dashboard');
     })->name('dashboard');
     Route::resource('products', ProductController::class);
+    //Rota pro PDF
+    Route::middleware('auth')->group(function () {
+        Route::get('reports/low-stock', [ReportController::class, 'lowStockPdf'])
+        ->name('reports.lowstock');
+    });
 });

@@ -28,8 +28,8 @@
 <nav class="navbar navbar-dark bg-dark mb-4">
     <div class="container d-flex justify-content-between align-items-center">
 
-        <a class="navbar-brand mb-0" href="{{ route('dashboard') }}">
-            Controle de Estoque Eletrônico
+        <a class="navbar-brand mb-0" href="{{ route('dashboard') }}" style="font-size: 38px;">
+            🍺 Stock Manager
         </a>
 
         <div class="d-flex align-items-center gap-2">
