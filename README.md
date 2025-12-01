@@ -19,18 +19,18 @@ Feito para pequenos comerciantes de eletrônicos para facilitar a gerência de e
 5. Criação  da view Reports - para gerar a tela do PDF
 
 
-## Guia de Instalação da dependência
-# Usei a dependência 'barryvdh/laravel-dompdf'
+# Guia de Instalação da dependência
+## Usei a dependência 'barryvdh/laravel-dompdf'
 1. composer require barryvdh/laravel-dompdf
 
 
-## Controller adicionada
-# Criação da ReportController
+# Controller adicionada
+## Criação da ReportController
 1. 'php artisan make:controller ReportController'
 
-## Rota adicionada
+# Rota adicionada
 1. Adição da ReportController na routes/web.php - (somente para usúarios logados)
 
-## View(Blade) de PDF adicionada
+# View(Blade) de PDF adicionada
 1. Criação da view reports/low_stock.blade
 
