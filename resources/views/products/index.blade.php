@@ -4,10 +4,22 @@
 
 @section('content')
 
+
 <div class="d-flex justify-content-between align-items-center mb-5">
     <h3>Produtos</h3>
-    <a href="{{ route('products.create') }}" class="btn btn-success">Novo Produto</a>
+
+    <div class="d-flex gap-2">
+        <!-- Botão PDF: Relatório de Estoque Baixo -->
+        <a href="{{ route('reports.lowstock', request()->only('category')) }}" 
+           class="btn btn-outline-danger"
+           target="_blank">
+            PDF: Estoque Baixo
+        </a>
+
+        <a href="{{ route('products.create') }}" class="btn btn-success">Novo Produto</a>
+    </div>
 </div>
+
 
 <!-- TABELA (desktop + tablet). Permite scroll horizontal em telas pequenas -->
 <div class="table-responsive desktop-only shadow-sm mb-3">
