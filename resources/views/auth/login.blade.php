@@ -104,7 +104,7 @@
       </div>
 
       <button class="btn-login" type="submit">
-        <div class="btn-text">Entrar →</div>
+        <div class="btn-text">Entrar→</div>
         <div class="spinner"></div>
       </button>
 
