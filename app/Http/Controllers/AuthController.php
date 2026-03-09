@@ -8,24 +8,19 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-
-
 class AuthController extends Controller
 {
-
-
     public function showRegister()
     {
-        return view('auth.register');
+        return redirect()->route('login')
+        ->withErrors(['email' => 'Não é possível fazer registro. Contate o administrador.']);
     }
 
     public function register(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6|confirmed',
-        ]);
+        return redirect()->route('login')
+        ->withErrors(['email' => 'Não é possível fazer registro. Contate o administrador.'
+    ]);
 
         $user = User::create([
             'name' => $data['name'],
@@ -52,17 +47,27 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->route('dashboard');
-        }
+            if (Auth::user()->role !== 'admin'){
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
 
-        return back()->withErrors([
-            'email' => 'Email ou senha incorretos',
-        ]);
+        return back()->withErrors(['email' => 'Acesso permitido somente para administradores.'])->withInput();
     }
+    return redirect()->route('dashboard');
+            }
+    return back()->withErrors(['email' => 'Email ou senha incorretos.'])->withInput();
+            
+    }
+    
 
     public function logout(Request $request)
     {
         Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        
         return redirect('/login');
 
     }

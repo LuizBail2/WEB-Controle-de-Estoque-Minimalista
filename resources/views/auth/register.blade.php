@@ -3,6 +3,14 @@
 @section('title','Registrar')
 
 @section('content')
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div style="width: 100%; max-width: 520px;">
+    <div class="text-center mb-3">
+        <img src="{{ asset('images/logo.png') }}"
+         alt="Logo Stock Manager"
+         style="width: 90px; height: 90px; object-fit: contain;">
+</div>
+
 <div style="display:flex; justify-content:center; margin-top:28px;">
   <div style="width:420px; box-shadow:0 8px 24px rgba(15,23,42,0.08); border-radius:8px; overflow:hidden; background:#fff;">
     <div style="padding:22px 24px;">
