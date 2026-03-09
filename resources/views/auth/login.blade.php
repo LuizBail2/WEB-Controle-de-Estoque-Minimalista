@@ -104,7 +104,7 @@
       </div>
 
       <button class="btn-login" type="submit">
-        <div class="btn-text">Entrar→</div>
+        <div class="btn-text">Entrar →</div>
         <div class="spinner"></div>
       </button>
 
@@ -117,7 +117,7 @@ function togglePass(id, btn) {
   const inp = document.getElementById(id);
   const isPass = inp.type === 'password';
   inp.type = isPass ? 'text' : 'password';
-  btn.textContent = isPass ? '👁' : '👁';
+  btn.textContent = isPass ? '👁' : '🚫';
 }
 </script>
 
