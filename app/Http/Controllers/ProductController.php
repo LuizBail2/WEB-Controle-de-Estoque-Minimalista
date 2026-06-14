@@ -2,141 +2,227 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Product;
+use App\Models\Supplier;
+use App\Models\Batch;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
 {
     public function index(Request $request)
     {
+        //Cards de topo
+        $stats = Product::selectRaw("
+            COUNT(*) as total,
+            COALESCE(SUM(CASE WHEN quantity > 0 AND quantity <= minimum_quantity THEN 1 ELSE 0 END), 0) as baixo,
+            COALESCE(SUM(CASE WHEN quantity = 0 THEN 1 ELSE 0 END), 0) as sem,
+            COALESCE(SUM(CASE WHEN quantity > minimum_quantity THEN 1 ELSE 0 END), 0) as ok,
+            COALESCE(SUM(COALESCE(price, 0) * quantity), 0) as valor
+        ")->first();
+
+        //Catálogo com filtros
         $query = Product::query();
 
-        // pesquisa por nome/categoria
         if ($request->filled('search')) {
-            $search = $request->search;
-
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
-                  ->orWhere('category', 'like', '%' . $search . '%');
+            $s = $request->search;
+            $query->where(function ($w) use ($s) {
+                $w->where('name', 'like', "%{$s}%")
+                  ->orWhere('code', 'like', "%{$s}%")
+                  ->orWhere('category', 'like', "%{$s}%");
             });
         }
 
-        // filtro categoria
         if ($request->filled('category')) {
             $query->where('category', $request->category);
         }
 
-        // filtro status (CORRIGIDO)
         if ($request->filled('status')) {
             if ($request->status === 'out') {
                 $query->where('quantity', 0);
             } elseif ($request->status === 'low') {
-                $query->where('quantity', '>', 0)
-                      ->whereColumn('quantity', '<=', 'minimum_quantity');
+                $query->where('quantity', '>', 0)->whereColumn('quantity', '<=', 'minimum_quantity');
             } elseif ($request->status === 'ok') {
                 $query->whereColumn('quantity', '>', 'minimum_quantity');
             }
         }
 
-        // categorias para o select
-        $categories = Product::select('category')
-            ->whereNotNull('category')
-            ->where('category', '!=', '')
-            ->distinct()
-            ->orderBy('category')
-            ->pluck('category');
+        $this->applySort($query, $request->input('sort', 'name_asc'));
 
-        $products = $query->orderBy('name')->paginate(7)->withQueryString();
+        $products = $query->paginate(10)->withQueryString();
 
-        return view('products.index', compact('products', 'categories'));
+        $categories     = Product::select('category')
+            ->whereNotNull('category')->where('category', '!=', '')
+            ->distinct()->orderBy('category')->pluck('category');
+        $allCategories  = Category::orderBy('name')->pluck('name');
+        $suppliers      = $this->suppliers();
+        $categoryColors = Category::pluck('color', 'name')->toArray();
+
+        return view('products.index', compact(
+            'products', 'stats', 'categories', 'allCategories', 'suppliers', 'categoryColors'
+        ));
     }
 
     public function create()
     {
-        return view('products.create');
+        $categories = Category::orderBy('name')->pluck('name');
+        $suppliers  = $this->suppliers();
+        return view('products.create', compact('categories', 'suppliers'));
     }
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:250',
-            'category' => 'nullable|string|max:250',
-            'quantity' => 'required|integer|min:0',
-            'minimum_quantity' => 'required|integer|min:0',
-            'price' => 'nullable|numeric|min:0',
+        $data = $this->validateData($request);
+        $request->validate([
+            'batch_lote'     => 'nullable|string|max:80',
+            'batch_expiry'   => 'nullable|date',
+            'batch_quantity' => 'nullable|integer|min:1',
         ]);
+        if (empty($data['code'])) $data['code'] = null;
+        if (!empty($data['category'])) Category::firstOrCreate(['name' => $data['category']]);
+        if (!empty($data['supplier'])) Supplier::firstOrCreate(['name' => $data['supplier']]);
 
-        Product::create($data);
+        $product = Product::create($data);
 
-        return redirect()->route('products.index')->with('success', 'Produto criado com sucesso.');
+        //Lote inicial, cria registro em batches e aparece na Validades e nos detalhes.
+        if ($request->filled('batch_expiry') && $request->filled('batch_quantity')) {
+            Batch::create([
+                'product_id'  => $product->id,
+                'lote'        => $request->input('batch_lote'),
+                'expiry_date' => $request->input('batch_expiry'),
+                'quantity'    => (int) $request->input('batch_quantity'),
+                'entry_date'  => now()->toDateString(),
+            ]);
+        }
+
+        return redirect()->route('products.index')->with('success', 'Produto "' . $data['name'] . '" criado com sucesso.');
     }
 
     public function show(Product $product)
     {
         if (request()->wantsJson()) {
             return response()->json([
-                'id' => $product->id,
-                'name' => $product->name,
-                'category' => $product->category,
-                'quantity' => $product->quantity,
+                'id'               => $product->id,
+                'name'             => $product->name,
+                'code'             => $product->code,
+                'category'         => $product->category,
+                'quantity'         => $product->quantity,
                 'minimum_quantity' => $product->minimum_quantity,
-                'price' => $product->price,
-                'status' => $product->quantity == 0
-                    ? 'Sem estoque'
-                    : ($product->quantity <= $product->minimum_quantity ? 'Baixo' : 'OK'),
-                'stock_value' => $product->price ? ($product->price * $product->quantity) : null,
-                'edit_url' => route('products.edit', $product),
+                'price'            => $product->price,
+                'supplier'         => $product->supplier,
+                'location'         => $product->location,
+                'note'             => $product->note,
+                'status'           => $product->quantity == 0 ? 'Sem estoque' : ($product->quantity <= $product->minimum_quantity ? 'Baixo' : 'OK'),
+                'stock_value'      => $product->price ? ($product->price * $product->quantity) : null,
+                'batches'          => Batch::where('product_id', $product->id)
+                ->where('quantity', '>', 0)
+                    ->orderBy('expiry_date')
+                ->get()
+                ->map(fn ($b) => [
+                'lote'        => $b->lote,
+                'expiry_date' => optional($b->expiry_date)->format('d/m/Y'),
+                'quantity'    => $b->quantity,
+                'status'      => $b->status,]),
+                'edit_url'         => route('products.edit', $product),
+                'update_url'       => route('products.update', $product),
+                'delete_url'       => route('products.destroy', $product),
             ]);
         }
-
         return redirect()->route('products.index');
     }
 
     public function edit(Product $product)
     {
+        $categories = Category::orderBy('name')->pluck('name');
+        $suppliers  = $this->suppliers();
 
         if (request()->boolean('modal')) {
-            return view('products.partials.edit-form', compact('product'));
+            return view('products.partials.edit-form', compact('product', 'categories', 'suppliers'));
         }
-
-        return view('products.edit', compact('product'));
+        return view('products.edit', compact('product', 'categories', 'suppliers'));
     }
 
     public function update(Request $request, Product $product)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:250',
-            'category' => 'nullable|string|max:250',
-            'quantity' => 'required|integer|min:0',
-            'minimum_quantity' => 'required|integer|min:0',
-            'price' => 'nullable|numeric|min:0',
+        $data = $this->validateData($request, $product->id);
+        $request->validate([
+            'batch_lote'     => 'nullable|string|max:80',
+            'batch_expiry'   => 'nullable|date',
+            'batch_quantity' => 'nullable|integer|min:1',
         ]);
+        if (empty($data['code'])) $data['code'] = null;
+        if (!empty($data['category'])) Category::firstOrCreate(['name' => $data['category']]);
+        if (!empty($data['supplier'])) Supplier::firstOrCreate(['name' => $data['supplier']]);
 
         $product->update($data);
 
-        if ($request->expectsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
-
-        $data = $request->validate([
-            'name' => 'required|string|max:250',
-            'sku' => 'nullable|string|max:80',
-            'category' => 'nullable|string|max:250',
-            'quantity' => 'required|integer|min:0',
-            'minimum_quantity' => 'required|integer|min:0',
-            'price' => 'nullable|numeric|min:0',
-            'supplier' => 'nullable|string|max:250',
-            'location' => 'nullable|string|max:250',
-            'note' => 'nullable|string|max:1000',
-]);
-            return response()->json(['ok' => true]);
+        //adicionar um novo lote
+        if ($request->filled('batch_expiry') && $request->filled('batch_quantity')) {
+            Batch::create([
+                'product_id'  => $product->id,
+                'lote'        => $request->input('batch_lote'),
+                'expiry_date' => $request->input('batch_expiry'),
+                'quantity'    => (int) $request->input('batch_quantity'),
+                'entry_date'  => now()->toDateString(),
+            ]);
         }
 
-        return redirect()->route('products.index')->with('success', 'Produto atualizado.');
+        if ($request->expectsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json(['ok' => true]);
+        }
+        return redirect()->route('products.index')->with('success', 'Produto "' . $product->name . '" atualizado.');
     }
 
     public function destroy(Product $product)
     {
+        $name = $product->name;
         $product->delete();
+        return redirect()->route('products.index')->with('success', 'Produto "' . $name . '" excluído.');
+    }
 
-        return redirect()->route('products.index')->with('success', 'Produto excluído.');
+    //meu auxiliar
+
+    private function applySort($query, string $sort): void
+    {
+        $cols = [
+            'name' => 'name', 'category' => 'category', 'quantity' => 'quantity',
+            'minimum' => 'minimum_quantity', 'price' => 'price', 'supplier' => 'supplier',
+        ];
+
+        if ($sort === 'value_asc') {
+            $query->orderByRaw('(COALESCE(price, 0) * quantity) ASC');
+        } elseif ($sort === 'value_desc') {
+            $query->orderByRaw('(COALESCE(price, 0) * quantity) DESC');
+        } elseif (preg_match('/^(\w+)_(asc|desc)$/', $sort, $m) && isset($cols[$m[1]])) {
+            $query->orderBy($cols[$m[1]], $m[2]);
+        } else {
+            $query->orderBy('name', 'asc');
+        }
+    }
+
+    private function validateData(Request $request, ?int $ignoreId = null): array
+    {
+        return $request->validate([
+            'name'             => 'required|string|max:250',
+            'category'         => 'nullable|string|max:250',
+            'quantity'         => 'required|integer|min:0',
+            'minimum_quantity' => 'required|integer|min:0',
+            'price'            => 'nullable|numeric|min:0',
+            'code'             => ['nullable', 'string', 'max:50'],
+            'supplier'         => 'nullable|string|max:250',
+            'location'         => 'nullable|string|max:250',
+            'note'             => 'nullable|string|max:1000',
+        ]);
+    }
+
+    private function suppliers()
+    {
+        //fornecedores cadastrados
+        $cadastrados = Supplier::orderBy('name')->pluck('name');
+        $emProdutos  = Product::whereNotNull('supplier')->where('supplier', '!=', '')
+            ->distinct()->pluck('supplier');
+
+        return $cadastrados->merge($emProdutos)->unique()->sort()->values();
     }
 }

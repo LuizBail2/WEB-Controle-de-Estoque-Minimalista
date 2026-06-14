@@ -1,47 +1,34 @@
 :root{
-  --sp-bg: #0b1020;
-  --sp-grid: rgba(255,255,255,.05);
-  --sp-panel: rgba(255,255,255,.06);
-  --sp-panel2: rgba(255,255,255,.08);
-  --sp-border: rgba(255,255,255,.10);
-  --sp-text: #e5e7eb;
-  --sp-muted: #9ca3af;
+  --sp-bg: var(--t-bg);
+  --sp-grid: var(--t-border-soft);
+  --sp-panel: var(--t-panel);
+  --sp-panel2: var(--t-panel-2);
+  --sp-border: var(--t-border);
+  --sp-text: var(--t-text);
+  --sp-muted: var(--t-muted);
 
   --sp-blue: #3b82f6;
   --sp-green:#22c55e;
   --sp-red:#ef4444;
   --sp-yellow:#fbbf24;
 
-  --sp-shadow: 0 20px 50px rgba(0,0,0,.55);
+  --sp-shadow: var(--t-shadow);
 }
 
-/* ===== Fundo (StockPro) ===== */
+/*Fundo*/
 .stockpro-page{
   min-height: 100%;
   color: var(--sp-text);
-  background:
-    radial-gradient(1200px 500px at 70% 10%, rgba(59,130,246,.12), transparent 60%),
-    radial-gradient(900px 450px at 15% 25%, rgba(34,197,94,.10), transparent 60%),
-    radial-gradient(900px 450px at 85% 65%, rgba(239,68,68,.10), transparent 60%),
-    linear-gradient(180deg, #0b1020, #070a14);
+  background: transparent;   
   border-radius: 16px;
   padding: 18px;
   position: relative;
   overflow:hidden;
 }
 
-.stockpro-page::before{
-  content:"";
-  position:absolute; inset:0;
-  background-image:
-    linear-gradient(var(--sp-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--sp-grid) 1px, transparent 1px);
-  background-size: 46px 46px;
-  opacity:.35;
-  pointer-events:none;
-}
+.stockpro-page::before{ content:none; }
 
-/* ===== Header ===== */
+/*Header*/
 .sp-header{
   position:relative;
   display:flex;
@@ -67,7 +54,7 @@
   flex-wrap:wrap;
 }
 
-/* ===== Botões ===== */
+/*Botões */
 .sp-btn{
   display:inline-flex;
   align-items:center;
@@ -76,7 +63,7 @@
   padding:10px 14px;
   border-radius: 12px;
   border:1px solid var(--sp-border);
-  background: rgba(255,255,255,.06);
+  background: var(--t-panel);
   color: var(--sp-text);
   text-decoration:none;
   font-weight: 800;
@@ -85,22 +72,22 @@
 .sp-btn:hover{ filter: brightness(1.05); }
 
 .sp-btn-green{
-  background: rgba(34,197,94,.14);
-  border-color: rgba(34,197,94,.35);
-  color: #b7f7cf;
+  background: #16a34a;
+  border-color: #15803d;
+  color: #ffffff;
 }
 .sp-btn-red{
-  background: rgba(239,68,68,.14);
-  border-color: rgba(239,68,68,.35);
-  color: #ffc6c6;
+  background: #dc2626;
+  border-color: #b91c1c;
+  color: #ffffff;
 }
 .sp-btn-blue{
-  background: rgba(59,130,246,.16);
-  border-color: rgba(59,130,246,.38);
-  color: #cfe3ff;
+  background: #2563eb;
+  border-color: #1d4ed8;
+  color: #ffffff;
 }
 
-/* ===== Cards ===== */
+/* Cards*/
 .sp-cards{
   position:relative;
   display:grid;
@@ -116,7 +103,7 @@
 }
 
 .sp-card{
-  background: rgba(255,255,255,.06);
+  background: var(--t-panel);
   border:1px solid var(--sp-border);
   border-radius: 18px;
   padding: 16px;
@@ -128,7 +115,7 @@
 .sp-card::before{
   content:"";
   position:absolute; left:0; top:0; bottom:0;
-  width:4px; background: rgba(255,255,255,.2);
+  width:4px; background: var(--t-border);
 }
 .sp-card.green::before{ background: var(--sp-green); }
 .sp-card.red::before{ background: var(--sp-red); }
@@ -150,7 +137,7 @@
   padding: 6px 10px;
   border-radius: 999px;
   border:1px solid var(--sp-border);
-  background: rgba(255,255,255,.06);
+  background: var(--t-panel);
   color: var(--sp-text);
 }
 .sp-chip.green{ background: rgba(34,197,94,.18); border-color: rgba(34,197,94,.35); }
@@ -170,10 +157,10 @@
   font-size: 12px;
 }
 
-/* ===== Barra de filtros ===== */
+/* Barra de filtros*/
 .sp-filters{
   position:relative;
-  background: rgba(255,255,255,.06);
+  background: var(--t-panel);
   border:1px solid var(--sp-border);
   border-radius: 18px;
   padding: 14px;
@@ -204,10 +191,10 @@
 .sp-input{ min-width: 240px; }
 .sp-select{ min-width: 190px; }
 
-/* ===== Painel / Tabela ===== */
+/*Painel / Tabela*/
 .sp-panel{
   position:relative;
-  background: rgba(255,255,255,.06);
+  background: var(--t-panel);
   border:1px solid var(--sp-border);
   border-radius: 18px;
   box-shadow: var(--sp-shadow);
@@ -215,7 +202,7 @@
 }
 .sp-panel-head{
   padding: 14px 16px;
-  border-bottom:1px solid rgba(255,255,255,.08);
+  border-bottom:1px solid var(--t-border);
 }
 .sp-panel-title{
   margin:0;
@@ -241,15 +228,15 @@
   font-weight: 900;
   letter-spacing: .12em;
   text-transform: uppercase;
-  background: rgba(255,255,255,.04);
-  border-bottom: 1px solid rgba(255,255,255,.08);
+  background: var(--t-hover);
+  border-bottom: 1px solid var(--t-border);
 }
 .sp-table td{
   padding: 12px 16px;
-  border-bottom: 1px solid rgba(255,255,255,.06);
+  border-bottom: 1px solid var(--t-border-soft);
   color: var(--sp-text);
 }
-.sp-table tr:hover td{ background: rgba(255,255,255,.04); }
+.sp-table tr:hover td{ background: var(--t-hover); }
 
 .sp-badge{
   display:inline-flex;
@@ -262,13 +249,9 @@
 }
 .sp-b-ok{ background: rgba(34,197,94,.16); border-color: rgba(34,197,94,.35); color:#b7f7cf; }
 .sp-b-low{ background: rgba(251,191,36,.16); border-color: rgba(251,191,36,.35); color:#ffe7b0; }
-.sp-b-out{ background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.18); color:#e5e7eb; }
+.sp-b-out{ background: var(--t-border); border-color: var(--t-input-border); color:var(--t-text); }
 
-/* ============================================================
-   MODAL (StockPro): blur SOMENTE no fundo (backdrop)
-   - NÃO borra modal
-   - NÃO borra sidebar/main com filter
-   ============================================================ */
+
 
 /* 1) Backdrop escuro + blur */
 .modal-backdrop{
@@ -283,16 +266,7 @@
   opacity: 1 !important;
 }
 
-/* 2) NÃO deixe nada no layout borrado por filter */
-/* (se você tiver isso em algum lugar, remova) */
-/*
-body.modal-open #mainContent,
-body.modal-open #sidebar{
-  filter: blur(10px);
-}
-*/
 
-/* 3) Modal sempre nítido e acima */
 .modal{
   z-index: 2000;
 }
@@ -302,31 +276,31 @@ body.modal-open #sidebar{
 }
 
 .modal-content{
-  background: rgba(17, 24, 39, .92);
-  border: 1px solid rgba(255,255,255,.10);
+  background: var(--t-panel);
+  border: 1px solid var(--t-border);
   border-radius: 18px;
-  box-shadow: 0 20px 60px rgba(0,0,0,.55);
-  color: rgba(255,255,255,.92);
+  box-shadow: var(--t-shadow);
+  color: var(--t-text);
 }
 
 /* header/footer do modal */
 .modal-header{
-  border-bottom: 1px solid rgba(255,255,255,.10);
+  border-bottom: 1px solid var(--t-border);
 }
 .modal-footer{
-  border-top: 1px solid rgba(255,255,255,.10);
+  border-top: 1px solid var(--t-border);
 }
 
 /* inputs dark */
 .modal .form-control,
 .modal .form-select{
-  background: rgba(0,0,0,.22);
-  border: 1px solid rgba(255,255,255,.12);
-  color: rgba(255,255,255,.92);
+  background: var(--t-input-bg);
+  border: 1px solid var(--t-input-border);
+  color: var(--t-text);
 }
 
 .modal .form-control::placeholder{
-  color: rgba(156,163,175,.75);
+  color: var(--t-muted);
 }
 
 .modal .form-control:focus,
@@ -344,11 +318,8 @@ body.modal-open #sidebar{
   opacity: 1;
 }
 
-/* =========================
-   MODAL + CHIPS (StockPro)
-   ========================= */
 
-/* BACKDROP: escuro + blur (borra somente o fundo, não o modal) */
+/* BACKDROP: escuro + blur */
 .modal-backdrop.show{
   opacity: .60;
   backdrop-filter: blur(10px);
@@ -361,28 +332,28 @@ body.modal-open #sidebar{
 
 /* Card do modal (glass dark) */
 .sp-modal{
-  background: rgba(17, 24, 39, .92);
-  border: 1px solid rgba(255,255,255,.10);
+  background: var(--t-panel);
+  border: 1px solid var(--t-border);
   border-radius: 18px;
-  box-shadow: 0 20px 60px rgba(0,0,0,.55);
-  color: rgba(255,255,255,.92);
+  box-shadow: var(--t-shadow);
+  color: var(--t-text);
   overflow:hidden;
 }
 
 .sp-modal-header{
-  border-bottom: 1px solid rgba(255,255,255,.10);
+  border-bottom: 1px solid var(--t-border);
   padding: 16px 18px;
 }
 
 .sp-modal-sub{
   display:block;
   margin-top: 4px;
-  color: rgba(156,163,175,.85);
+  color: var(--t-muted);
   font-weight: 600;
 }
 
 .sp-modal-close{
-  filter: invert(1);
+  filter: var(--t-btnclose, invert(1));
   opacity: .80;
 }
 .sp-modal-close:hover{ opacity: 1; }
@@ -390,21 +361,21 @@ body.modal-open #sidebar{
 .sp-modal-body{ padding: 16px 18px; }
 
 .sp-modal-footer{
-  border-top: 1px solid rgba(255,255,255,.10);
+  border-top: 1px solid var(--t-border);
   padding: 14px 18px;
 }
 
 /* inputs dark */
 .sp-modal-input,
 .sp-modal-select{
-  background: rgba(0,0,0,.22) !important;
-  border: 1px solid rgba(255,255,255,.12) !important;
-  color: rgba(255,255,255,.92) !important;
+  background: var(--t-input-bg) !important;
+  border: 1px solid var(--t-input-border) !important;
+  color: var(--t-text) !important;
   border-radius: 14px !important;
   padding: 10px 12px !important;
 }
 .sp-modal-input::placeholder{
-  color: rgba(156,163,175,.75) !important;
+  color: var(--t-muted) !important;
 }
 .sp-modal-input:focus,
 .sp-modal-select:focus{
@@ -413,26 +384,26 @@ body.modal-open #sidebar{
 }
 
 .sp-modal-label{
-  color: rgba(229,231,235,.85);
+  color: var(--t-text-soft);
   font-weight: 800;
   font-size: 13px;
 }
 
-/* Botões do footer (bonitos e arredondados) */
+/* Botões do footer */
 .sp-modal-btn{
-  border: 1px solid rgba(255,255,255,.12);
+  border: 1px solid var(--t-border);
   border-radius: 14px;
   padding: 10px 14px;
   font-weight: 900;
-  background: rgba(255,255,255,.06);
-  color: rgba(255,255,255,.92);
+  background: var(--t-panel);
+  color: var(--t-text);
   transition: filter .15s ease, transform .06s ease;
 }
 .sp-modal-btn:active{ transform: translateY(1px); }
 .sp-modal-btn:hover{ filter: brightness(1.06); }
 
 .sp-modal-btn-ghost{
-  background: rgba(255,255,255,.06);
+  background: var(--t-panel);
 }
 
 .sp-modal-btn-primary{
@@ -448,16 +419,16 @@ body.modal-open #sidebar{
   margin-top: 10px;
 }
 
-/* formato pill arredondado */
+/* formato arredondado */
 .mov-chip-btn{
   display:inline-flex;
   align-items:center;
   gap:8px;
   padding: 10px 12px;
-  border-radius: 999px;              /* arredondado total */
-  border: 1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.06);
-  color: rgba(229,231,235,.92);
+  border-radius: 999px;             
+  border: 1px solid var(--t-input-border);
+  background: var(--t-panel);
+  color: var(--t-text);
   font-weight: 900;
   font-size: 13px;
   line-height: 1;
@@ -478,10 +449,10 @@ body.modal-open #sidebar{
   opacity: .95;
 }
 
-/* Estado ativo (base) */
+/* Estado ativo */
 .mov-chip-btn.is-active{
-  background: rgba(255,255,255,.10);
-  border-color: rgba(255,255,255,.22);
+  background: var(--t-border);
+  border-color: var(--t-input-border);
   box-shadow: 0 10px 30px rgba(0,0,0,.35);
 }
 
@@ -507,7 +478,16 @@ body.modal-open #sidebar{
   color: #cfe3ff;
 }
 .mov-chip-btn.is-devolucao{
-  background: rgba(168,85,247,.16);          /* roxinho pro destaque */
+  background: rgba(168,85,247,.16);          
   border-color: rgba(168,85,247,.45);
   color: #e9d5ff;
+}
+
+/*Mobile*/
+@media (max-width: 992px){
+  .sp-filters > *{ flex: 1 1 100%; }
+  .sp-filters .sp-label{ margin-right:0; flex-basis:auto; }
+  .sp-filters .sp-input, .sp-filters .sp-select{ width:100%; }
+  .sp-header{ flex-wrap: wrap; gap: 10px; }
+  .sp-actions{ flex-wrap: wrap; }
 }

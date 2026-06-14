@@ -1,124 +1,68 @@
 @extends('layouts.guest')
 
-@section('title', 'StockPro — Login')
+@section('title', 'Nexo Estoque — Login')
 
 @section('content')
-
-<div class="bg-glow bg-glow-1"></div>
-<div class="bg-glow bg-glow-2"></div>
-<div class="bg-grid"></div>
-
-<div class="container">
-
-  <div class="left-panel">
-    <div class="brand">
-      <div class="brand-icon">📦</div>
-      <div class="brand-name">Gerenciador<span> de Estoque</span></div>
+<div class="auth-card">
+  <div class="auth-form">
+    <div class="auth-brand">
+      <div class="auth-logo"><img src="{{ asset('images/logo.png') }}" alt="Nexo Estoque"></div>
+      <span class="auth-brand__name">Nexo Estoque</span>
     </div>
+    <h1 class="auth-title">Faça o login</h1>
+    <p class="auth-sub">Acesse sua conta para continuar</p>
 
-    <div class="left-hero">
-      <div class="left-title">Gerencie seu<br>estoque com <span>precisão</span></div>
-      <div class="left-sub">Controle entradas, saídas e alertas<br>de estoque em tempo real.</div>
-    </div>
-
-    <div class="features">
-      <div class="feature-item">
-        <div class="feature-icon" style="background:rgba(34,211,160,.12)">📊</div>
-        <div class="feature-text">
-          <strong>Dashboard completo</strong>
-          Visualize métricas e KPIs de estoque
-        </div>
-      </div>
-
-      <div class="feature-item">
-        <div class="feature-icon" style="background:rgba(245,200,66,.12)">⚠️</div>
-        <div class="feature-text">
-          <strong>Alertas automáticos</strong>
-          Notificações de estoque baixo e vencimento
-        </div>
-      </div>
-
-      <div class="feature-item">
-        <div class="feature-icon" style="background:rgba(79,142,247,.12)">↔️</div>
-        <div class="feature-text">
-          <strong>Histórico de movimentações</strong>
-          Rastreie cada entrada e saída com detalhes
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="right-panel">
-    <div class="login-header">
-      <div class="login-icon">🔐</div>
-      <div class="login-title">Faça o login</div>
-      <div class="login-sub">Acesse sua conta para continuar</div>
-    </div>
-
-    <form class="form" method="POST" action="{{ route('login.perform') }}">
+    <form method="POST" action="{{ route('login.perform') }}">
       @csrf
 
       @if($errors->any())
-        <div class="error-msg show">
-          <span>⚠️</span>
-          <span>{{ $errors->first() }}</span>
-        </div>
+        <div class="auth-error"><span>⚠️</span><span>{{ $errors->first() }}</span></div>
       @endif
 
-      <div class="form-field">
-        <label class="form-label">Email</label>
-        <div class="input-wrap">
-          <span class="input-icon">✉️</span>
-          <input
-            class="form-input @error('email') error @enderror"
-            name="email"
-            type="email"
-            placeholder="seu@email.com"
-            value="{{ old('email') }}"
-            autocomplete="email"
-            required
-          >
+      <div class="auth-field">
+        <label>Email</label>
+        <div class="auth-input-wrap">
+          <span class="ic">✉️</span>
+          <input class="auth-input @error('email') error @enderror"
+                 name="email" type="email" placeholder="seu@email.com"
+                 value="{{ old('email') }}" autocomplete="email" required>
         </div>
       </div>
 
-      <div class="form-field">
-        <label class="form-label">Senha</label>
-        <div class="input-wrap">
-          <span class="input-icon">🔒</span>
-          <input
-            class="form-input @error('password') error @enderror"
-            id="loginPassword"
-            name="password"
-            type="password"
-            placeholder="••••••••"
-            autocomplete="current-password"
-            required
-          >
-          <button class="input-toggle" onclick="togglePass('loginPassword', this)" tabindex="-1" type="button">👁</button>
+      <div class="auth-field">
+        <label>Senha</label>
+        <div class="auth-input-wrap">
+          <span class="ic">🔒</span>
+          <input class="auth-input @error('password') error @enderror"
+                 id="loginPassword" name="password" type="password" placeholder="••••••••"
+                 autocomplete="current-password" required>
+          <button class="auth-eye" type="button" tabindex="-1" onclick="togglePass('loginPassword', this)">👁</button>
         </div>
       </div>
 
-      <div class="form-row">
-        
-        {{-- <a href="#" class="forgot">Esqueci a senha</a> --}}
-      </div>
+      <div class="auth-row"><a href="{{ route('password.request') }}" class="auth-forgot">Esqueci a senha</a></div>
 
-      <button class="btn-login" type="submit">
-        <div class="btn-text">Entrar →</div>
-        <div class="spinner"></div>
-      </button>
+      <button class="auth-btn" type="submit">Entrar →</button>
 
+      <div class="auth-foot">Não tem conta? <a href="{{ route('register') }}">Cadastre-se</a></div>
     </form>
+  </div>
+
+  <div class="auth-aside">
+    <div class="auth-aside__head">
+      <h2>Controle total do seu <span>estoque de peças</span></h2>
+      <p>Do recebimento à saída, tudo em um só lugar.</p>
+    </div>
+    <div class="auth-aside__img"><img src="{{ asset('images/login-illustration.png') }}" alt="Gestão de estoque"></div>
   </div>
 </div>
 
 <script>
 function togglePass(id, btn) {
-  const inp = document.getElementById(id);
-  const isPass = inp.type === 'password';
-  inp.type = isPass ? 'text' : 'password';
-  btn.textContent = isPass ? '👁' : '🚫';
+  const i = document.getElementById(id);
+  const p = i.type === 'password';
+  i.type = p ? 'text' : 'password';
+  btn.textContent = p ? '🙈' : '👁';
 }
 </script>
-
 @endsection

@@ -1,3 +1,44 @@
+:root,
+[data-theme="dark"]{
+  color-scheme: dark;
+  --t-bg:           #0b0f17;
+  --t-panel:        #111827;
+  --t-panel-2:      #0b1220;
+  --t-text:         #e5e7eb;
+  --t-text-soft:    rgba(229,231,235,.85);
+  --t-muted:        #94a3b8;
+  --t-border:       rgba(255,255,255,.08);
+  --t-border-soft:  rgba(255,255,255,.06);
+  --t-hover:        rgba(255,255,255,.06);
+  --t-input-bg:     #0b1220;
+  --t-input-border: rgba(255,255,255,.14);
+  --t-sidebar-bg:   #0b1220;
+  --t-sidebar-border: rgba(255,255,255,.08);
+  --t-active:       rgba(124,92,252,.22);
+  --t-shadow:       0 10px 24px rgba(0,0,0,.35);
+  --t-btnclose:     invert(1);
+  color-scheme: dark;
+}
+[data-theme="light"]{
+  color-scheme: light;
+  --t-bg:           #f3f4f6;
+  --t-panel:        #ffffff;
+  --t-panel-2:      #f9fafb;
+  --t-text:         #0f172a;
+  --t-text-soft:    #1f2937;
+  --t-muted:        #4b5563;
+  --t-border:       rgba(0,0,0,.12);
+  --t-border-soft:  rgba(0,0,0,.08);
+  --t-hover:        rgba(0,0,0,.04);
+  --t-input-bg:     #ffffff;
+  --t-input-border: rgba(0,0,0,.18);
+  --t-sidebar-bg:   #ffffff;
+  --t-sidebar-border: rgba(0,0,0,.08);
+  --t-active:       rgba(124,92,252,.12);
+  --t-shadow:       0 8px 20px rgba(0,0,0,.08);
+  --t-btnclose:     invert(0);
+}
+
 :root{
   --bg: #0f172a;
   --panel: #111827;
@@ -22,15 +63,15 @@
   --surface2: var(--panel-2);
 }
 
-/* ===== Layout base ===== */
+/* Layout base*/
 .main{
   margin-left:240px;
   padding:36px 40px;
   min-height: 100vh;
-  background: #f3f4f6; /* deixa dashboard bonito, igual antes (bg-light) */
+  background: #f3f4f6;
 }
 
-/* responsivo (se quiser usar depois com toggle) */
+/* responsividade */
 @media (max-width: 991.98px){
   .main{
     margin-left:0;
@@ -40,7 +81,7 @@
   .main.shift{ margin-left:260px; }
 }
 
-/* ===== Header ===== */
+/*Header*/
 .page-header{
   display:flex;
   justify-content:space-between;
@@ -68,7 +109,7 @@
   flex-wrap:wrap;
 }
 
-/* ===== Buttons (tema) ===== */
+/*Buttons*/
 .btn{
   display:inline-flex;
   align-items:center;
@@ -100,7 +141,7 @@
 }
 .btn-secondary:hover{ filter: brightness(0.99); }
 
-/* ===== Stats Grid (3 cards por linha) ===== */
+/*Stats Grid*/
 .stats-grid{
   display:grid;
   grid-template-columns: repeat(3, minmax(240px, 1fr));
@@ -116,7 +157,7 @@
   .stats-grid{ grid-template-columns: 1fr; }
 }
 
-/* ===== Stat Card ===== */
+/*Stat Card*/
 .stat-card{
   position:relative;
   background:#fff;
@@ -169,7 +210,7 @@
 .chip-blue{ background: rgba(59,130,246,.12); color: #1d4ed8; border-color: rgba(59,130,246,.25); }
 .chip-green{ background: rgba(34,197,94,.12); color: #15803d; border-color: rgba(34,197,94,.25); }
 .chip-yellow{ background: rgba(251,191,36,.18); color: #92400e; border-color: rgba(255, 230, 0, 0.35); }
-.chip-red{ background: rgba(239,68,68,.12); color: #b91c1c; border-color: rgba(255, 230, 0, 0.25); }
+.chip-red{ background: rgba(239,68,68,.12); color: #b91c1c; border-color: rgba(255, 0, 0, 0.25); }
 
 .stat-value{
   font-size:34px;
@@ -194,7 +235,7 @@
   opacity:.18;
 }
 
-/* ===== Catálogo centralizado (estilo StockPro) ===== */
+/*Catálogo centralizado*/
 .catalog-wrap{
   max-width: 980px;      /* largura do bloco */
   margin: 18px auto 0;   /* centraliza */
@@ -267,7 +308,7 @@
 .badge-low{ background: rgba(251,191,36,.18); color:#92400e; border-color: rgba(255, 230, 0, 0.35); }
 .badge-out{ background: rgba(0,0,0,.08); color:#111827; border-color: rgba(0,0,0,.12); }
 
-/* Responsivo */
+/* Responsividade */
 @media (max-width: 1100px){
   .catalog-wrap{ max-width: 100%; }
 }
@@ -379,16 +420,13 @@
 .mov-chip.red{ background:rgba(239,68,68,.12); color:#b91c1c; border-color:rgba(239,68,68,.25); }
 .mov-chip.yellow{ background:rgba(251,191,36,.18); color:#92400e; border-color:rgba(251,191,36,.35); }
 
-/* =======================================================================
-   SIDEBAR (escura estilo StockPro)
-   ======================================================================= */
 
 .sidebar{
   width:240px;
   min-height:100vh;
-  background: var(--surface) !important;
-  color: var(--text) !important;
-  border-right: 1px solid var(--border) !important;
+  background: var(--t-sidebar-bg) !important;
+  color: var(--t-text) !important;
+  border-right: 1px solid var(--t-sidebar-border) !important;
   display:flex;
   flex-direction:column;
   position:fixed;
@@ -408,7 +446,7 @@
 
 .sidebar-logo{
   padding:24px 20px;
-  border-bottom:1px solid var(--border);
+  border-bottom:1px solid var(--t-sidebar-border);
   display:flex;
   align-items:center;
   gap:10px;
@@ -426,10 +464,10 @@
 
 .logo-text{
   font-weight:900;
-  color:#fff;
+  color:var(--t-text);
 }
 .logo-text span{
-  color: var(--muted2);
+  color: var(--t-muted);
   font-weight:800;
 }
 
@@ -438,7 +476,7 @@
   font-size:10px;
   font-weight:800;
   letter-spacing:1.5px;
-  color:var(--muted) !important;
+  color:var(--t-muted) !important;
   text-transform:uppercase;
 }
 
@@ -449,18 +487,18 @@
   padding:10px 16px;
   margin:2px 8px;
   border-radius:10px;
-  color: var(--muted2) !important;
+  color: var(--t-text-soft) !important;
   text-decoration:none;
   transition:.2s;
 }
 .nav-item:hover{
-  background:rgba(255,255,255,.06) !important;
-  color:#fff !important;
+  background:var(--t-hover) !important;
+  color:var(--t-text) !important;
 }
 
 .nav-item.active{
   background:linear-gradient(135deg, rgba(59,130,246,.22), rgba(124,92,252,.14)) !important;
-  color:#fff !important;
+  color:var(--t-text) !important;
   font-weight:900;
   border:1px solid rgba(59,130,246,.25) !important;
 }
@@ -468,7 +506,7 @@
 .sidebar-footer{
   margin-top:auto;
   padding:16px 12px;
-  border-top:1px solid var(--border);
+  border-top:1px solid var(--t-sidebar-border);
 }
 
 .user-card{
@@ -477,7 +515,7 @@
   gap:10px;
   padding:10px 12px;
   border-radius:12px;
-  background:rgba(255,255,255,.06);
+  background:var(--t-hover);
 }
 
 .avatar{
@@ -495,12 +533,12 @@
 .user-name{
   font-size:13px;
   font-weight:900;
-  color:#fff;
+  color:var(--t-text);
   line-height:1.2;
 }
 .user-role{
   font-size:11px;
-  color:var(--muted);
+  color:var(--t-muted);
   font-weight:800;
   margin-top:2px;
 }
@@ -531,9 +569,7 @@
   padding-right: 0;
 }
 
-/* ==========================
-   PRODUTOS - TEMA DARK (SÓ AQUI)
-   ========================== */
+/*PRODUTOS - TEMA DARK*/
 
 .products-dark{
   background: #0b0f17;
@@ -669,8 +705,8 @@ main:has(.products-dark){
    MOVIMENTAÇÕES - MESMO TEMA DO PRODUTOS
    ========================== */
 .mov-dark{
-  background: #0b0f17;
-  color: #e5e7eb;
+  background: var(--t-bg);
+  color: var(--t-text);
   border-radius: 18px;
   padding: 22px;
 }
@@ -679,44 +715,44 @@ main:has(.products-dark){
 .mov-dark .card,
 .mov-dark .shadow,
 .mov-dark .shadow-sm{
-  background: #101626 !important;
-  border: 1px solid rgba(255,255,255,.08) !important;
-  color:#e5e7eb !important;
+  background: var(--t-panel) !important;
+  border: 1px solid var(--t-border) !important;
+  color:var(--t-text) !important;
 }
 
 /* inputs/selects */
 .mov-dark .form-control,
 .mov-dark .form-select{
-  background:#141a2a !important;
-  color:#e5e7eb !important;
-  border:1px solid rgba(255,255,255,.10) !important;
+  background:var(--t-input-bg) !important;
+  color:var(--t-text) !important;
+  border:1px solid var(--t-input-border) !important;
   border-radius: 12px !important;
 }
 .mov-dark .form-control::placeholder{
-  color: rgba(229,231,235,.55) !important;
+  color: var(--t-muted) !important;
 }
 
 /* tabela */
 .mov-dark .table{
-  color:#e5e7eb !important;
-  border-color: rgba(255,255,255,.08) !important;
+  color:var(--t-text) !important;
+  border-color: var(--t-border) !important;
 }
 .mov-dark thead th{
-  background:#141a2a !important;
-  color: rgba(229,231,235,.75) !important;
-  border-bottom:1px solid rgba(255,255,255,.10) !important;
+  background:var(--t-panel-2) !important;
+  color: var(--t-text-soft) !important;
+  border-bottom:1px solid var(--t-border) !important;
 }
 .mov-dark td{
-  border-bottom:1px solid rgba(255,255,255,.06) !important;
+  border-bottom:1px solid var(--t-border-soft) !important;
 }
 .mov-dark .table-striped > tbody > tr:nth-of-type(odd) > *{
-  background:#0f1524 !important;
+  background:var(--t-hover) !important;
 }
 .mov-dark .table-striped > tbody > tr:nth-of-type(even) > *{
-  background:#0c1220 !important;
+  background:transparent !important;
 }
 
-/* REMOVE o “grid/quadriculado” (inclusive se for ::before/::after) só na tela de Movimentações */
+
 .mov-dark::before,
 .mov-dark::after,
 .mov-dark *::before,
@@ -877,10 +913,10 @@ main:has(.products-dark){
   max-width: 92vw;
   max-height: 86vh;
   overflow: hidden;
-  background: #101626;
-  border: 1px solid rgba(255,255,255,.10);
+  background: var(--t-panel);
+  border: 1px solid var(--t-border);
   border-radius: 18px;
-  box-shadow: 0 20px 60px rgba(0,0,0,.55);
+  box-shadow: var(--t-shadow);
   opacity:0;
   transition: opacity .2s ease, transform .2s ease;
   display:flex;
@@ -893,19 +929,19 @@ main:has(.products-dark){
 
 .center-modal__header{
   padding: 14px 16px;
-  border-bottom: 1px solid rgba(255,255,255,.10);
+  border-bottom: 1px solid var(--t-border);
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:12px;
 }
-.center-modal__title{ color:#fff; font-weight:900; }
+.center-modal__title{ color:var(--t-text); font-weight:900; }
 .center-modal__close{
   width:40px;height:40px;
   border-radius: 12px;
-  border:1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.06);
-  color:#fff;
+  border:1px solid var(--t-input-border);
+  background: var(--t-hover);
+  color:var(--t-text);
 }
 
 .center-modal__body{
@@ -916,30 +952,30 @@ main:has(.products-dark){
 .center-modal__loading{
   padding: 18px;
   border-radius: 14px;
-  border:1px solid rgba(255,255,255,.08);
-  background: rgba(255,255,255,.04);
-  color: rgba(229,231,235,.8);
+  border:1px solid var(--t-border);
+  background: var(--t-hover);
+  color: var(--t-text-soft);
 }
 
 /* deixa inputs bonitos dentro do modal */
-.center-modal .form-label{ color: rgba(229,231,235,.75); font-weight:700; }
+.center-modal .form-label{ color: var(--t-text-soft); font-weight:700; }
 .center-modal .form-control,
 .center-modal .form-select{
-  background:#141a2a !important;
-  color:#e5e7eb !important;
-  border:1px solid rgba(255,255,255,.10) !important;
+  background:var(--t-input-bg) !important;
+  color:var(--t-text) !important;
+  border:1px solid var(--t-input-border) !important;
   border-radius: 12px !important;
 }
 
 /* detalhes do modal editar */
 .modal-section-title{
-  color: rgba(229,231,235,.55);
+  color: var(--t-muted);
   font-weight: 800;
   letter-spacing: .12em;
   font-size: 11px;
 }
 .modal-hr{
-  border-color: rgba(255,255,255,.08);
+  border-color: var(--t-border);
   margin: 8px 0 0;
 }
 
@@ -991,95 +1027,136 @@ main:has(.products-dark){
   display: block;
 }
 .main.main-dark{
-  background: #0b0f17 !important;
+  background: var(--t-bg) !important;
 }
 .main.main-dark .page-title,
 .main.main-dark h1,
 .main.main-dark h2,
 .main.main-dark h3{
-  color: #fff !important;
+  color: var(--t-text) !important;
 }
 
-/* Dashboard em modo dark: cards "claros escuros" */
+/* Dashboard: cards conforme o tema */
 .main.main-dark .stat-card,
 .main.main-dark .catalog-card{
-  background: rgba(255,255,255,.06) !important;   /* bem fraquinho */
-  border: 1px solid rgba(255,255,255,.10) !important;
-  box-shadow: 0 10px 24px rgba(0,0,0,.35) !important;
+  background: var(--t-panel) !important;
+  border: 1px solid var(--t-border) !important;
+  box-shadow: var(--t-shadow) !important;
 }
 
 /* textos dentro dos cards */
 .main.main-dark .stat-card .stat-label,
 .main.main-dark .catalog-card .catalog-title{
-  color: rgba(229,231,235,.85) !important;
+  color: var(--t-text-soft) !important;
 }
 .main.main-dark .stat-card .stat-value{
-  color: #fff !important;
+  color: var(--t-text) !important;
 }
 .main.main-dark .stat-card .stat-footer,
 .main.main-dark .catalog-sub{
-  color: rgba(229,231,235,.60) !important;
+  color: var(--t-muted) !important;
 }
 
 /* cabeçalho da tabela do catálogo */
 .main.main-dark .catalog-table th{
-  background: rgba(255,255,255,.04) !important;
-  color: rgba(229,231,235,.65) !important;
-  border-bottom: 1px solid rgba(255,255,255,.08) !important;
+  background: var(--t-hover) !important;
+  color: var(--t-muted) !important;
+  border-bottom: 1px solid var(--t-border) !important;
 }
 
 /* linhas da tabela (suave) */
 .main.main-dark .catalog-table td{
-  border-bottom: 1px solid rgba(255,255,255,.06) !important;
-  color: rgba(229,231,235,.85) !important;
+  border-bottom: 1px solid var(--t-border-soft) !important;
+  color: var(--t-text-soft) !important;
 }
 
-/* ===== DASHBOARD (main-dark): inputs/selects dark ===== */
+/*DASHBOARD (main-dark)*/
 .main.main-dark .form-control,
 .main.main-dark .form-select,
 .main.main-dark select,
 .main.main-dark input{
-  background: #141a2a !important;
-  color: #e5e7eb !important;
-  border: 1px solid rgba(255,255,255,.10) !important;
+  background: var(--t-input-bg) !important;
+  color: var(--t-text) !important;
+  border: 1px solid var(--t-input-border) !important;
   border-radius: 12px !important;
 }
 
 .main.main-dark .form-control::placeholder{
-  color: rgba(229,231,235,.55) !important;
+  color: var(--t-muted) !important;
 }
 
-/* dropdown options (quando o navegador permite) */
+/* dropdown options */
 .main.main-dark select option{
-  background: #141a2a !important;
-  color: #e5e7eb !important;
+  background: var(--t-input-bg) !important;
+  color: var(--t-text) !important;
 }
 
-/* ===== MOVIMENTAÇÕES: inputs/selects dark igual Produtos ===== */
+/*MOVIMENTAÇÕES: */
 .mov-dark .form-control,
 .mov-dark .form-select,
 .mov-dark select,
 .mov-dark input{
-  background: #141a2a !important;
-  color: #e5e7eb !important;
-  border: 1px solid rgba(255,255,255,.10) !important;
+  background: var(--t-input-bg) !important;
+  color: var(--t-text) !important;
+  border: 1px solid var(--t-input-border) !important;
   border-radius: 12px !important;
 }
 
 /* placeholder */
 .mov-dark .form-control::placeholder{
-  color: rgba(229,231,235,.55) !important;
+  color: var(--t-muted) !important;
 }
 
-/* dropdown options (muitos navegadores respeitam) */
+/* dropdown options */
 .mov-dark select option{
-  background: #141a2a !important;
-  color: #e5e7eb !important;
+  background: var(--t-input-bg) !important;
+  color: var(--t-text) !important;
 }
 
-/* botão (se ele estiver claro) */
+/*botão*/
 .mov-dark .btn-outline-secondary{
-  background:#1a2236 !important;
-  color:#e5e7eb !important;
-  border:1px solid rgba(255,255,255,.12) !important;
+  background:var(--t-panel-2) !important;
+  color:var(--t-text) !important;
+  border:1px solid var(--t-input-border) !important;
+}
+
+/*Produtos, texto branco*/
+.product-form-page,
+.product-form-page h1,
+.product-form-page h2,
+.product-form-page h3,
+.product-form-page label,
+.product-form-page .form-label,
+.product-form-page .form-text{
+  color: var(--t-text) !important;
+}
+
+/* inputs/ selects no tema dark */
+.product-form-page .form-control,
+.product-form-page .form-select{
+  background: var(--t-input-bg) !important;
+  border: 1px solid var(--t-input-border) !important;
+  color: var(--t-text) !important;
+}
+
+.product-form-page .form-control::placeholder{
+  color: var(--t-muted) !important;
+}
+
+.product-form-page .form-control:focus,
+.product-form-page .form-select:focus{
+  box-shadow: 0 0 0 3px rgba(59,130,246,.25) !important;
+  border-color: rgba(59,130,246,.55) !important;
+}
+/*Botões "outline-light" adaptados ao tema*/
+.main.main-dark .btn-outline-light{
+  color: var(--t-text) !important;
+  border-color: var(--t-input-border) !important;
+  background: transparent !important;
+}
+.main.main-dark .btn-outline-light:hover,
+.main.main-dark .btn-outline-light:focus{
+  background: var(--t-hover) !important;
+  color: var(--t-text) !important;
+  border-color: var(--t-input-border) !important;
 }
