@@ -4,23 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Models\Payable;
 use App\Models\Receivable;
-use App\Models\Product;        
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class FinanceController extends Controller
 {
-//Confirma no banco: a coluna que marca entrada.
-
+    //Confirma no banco
     private const INBOUND_TYPE = 'entrada';
 
     public function index()
     {
-        //Custo médio por produto,média do preço unitário de entrada.
+    
+        $ownerProductIds = Product::query()->pluck('id');
+
         $avgCosts = DB::table('movements')
             ->where('type', self::INBOUND_TYPE)
             ->where('unit_price', '>', 0)
+            ->whereIn('product_id', $ownerProductIds)
             ->groupBy('product_id')
             ->selectRaw('product_id, SUM(quantity * unit_price) / NULLIF(SUM(quantity), 0) AS avg_cost')
             ->pluck('avg_cost', 'product_id');
@@ -39,7 +42,7 @@ class FinanceController extends Controller
                 $p->unit_profit = round($profit, 2);
                 $p->margin_pct  = round($margin, 1);
                 $p->stock_cost  = round($cost * (float) $p->quantity, 2);
-                $p->has_cost    = $cost > 0; 
+                $p->has_cost    = $cost > 0;
                 return $p;
             });
 
@@ -59,7 +62,7 @@ class FinanceController extends Controller
         return view('finance.index', compact('products', 'summary'));
     }
 
-    //fluxo da caixa - Cash flow
+    // fluxo de caixa - Cash flow
     public function cashFlow(Request $request)
     {
         $months = (int) $request->integer('months', 6);
@@ -111,8 +114,7 @@ class FinanceController extends Controller
         return view('finance.cashflow', compact('series', 'totals', 'months'));
     }
 
-   //contas a pagar - Payables
- 
+    // contas a pagar - Payables
     public function payables(Request $request)
     {
         $filter = $request->get('filter', 'all');
@@ -139,6 +141,7 @@ class FinanceController extends Controller
             'notes'       => ['nullable', 'string'],
         ]);
 
+        // O trait BelongsToUser preenche user_id automaticamente no creating.
         Payable::create($data);
 
         return back()->with('ok', 'Conta a pagar criada.');
@@ -155,8 +158,8 @@ class FinanceController extends Controller
         $payable->delete();
         return back()->with('ok', 'Conta removida.');
     }
-//contas a receber - receivables
 
+    // contas a receber - receivables
     public function receivables(Request $request)
     {
         $filter = $request->get('filter', 'all');
@@ -183,6 +186,7 @@ class FinanceController extends Controller
             'notes'       => ['nullable', 'string'],
         ]);
 
+        // O trait BelongsToUser preenche user_id automaticamente no creating.
         Receivable::create($data);
 
         return back()->with('ok', 'Conta a receber criada.');

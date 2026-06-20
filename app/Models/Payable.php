@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToUser;
 use App\Models\Concerns\LogsTeamActivity;
 
 use Illuminate\Database\Eloquent\Model;
@@ -9,9 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Payable extends Model
 {
-    use LogsTeamActivity;
+    use BelongsToUser, LogsTeamActivity;
     //Eloquent mapeia o contas a pagar automaticamente.
-
     protected $fillable = [
         'description', 'supplier_id', 'purchase_order_id', 'category',
         'amount', 'due_date', 'paid', 'paid_at', 'notes',
@@ -42,4 +42,5 @@ class Payable extends Model
     {
         return $q->where('paid', false)->whereDate('due_date', '<', now());
     }
+    use BelongsToUser;
 }

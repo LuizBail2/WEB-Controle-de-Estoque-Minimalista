@@ -4,13 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
 
-    //Abas do sistema, usadas nas permissões
+    //Abas do sistema
     public const ABAS = [
         'dashboard'       => 'Dashboard',
         'products'        => 'Produtos',
@@ -31,6 +32,7 @@ class User extends Authenticatable
         'permissions',
         'status',
         'theme',
+        'company_id',
     ];
 
     protected $hidden = [
@@ -47,9 +49,7 @@ class User extends Authenticatable
         ];
     }
 
-    // Dono,Equipe
-
-    //É o dono da conta admin
+    //dono da conta
     public function isAdmin(): bool
     {
         return is_null($this->owner_id);
@@ -59,13 +59,18 @@ class User extends Authenticatable
     public function isPending(): bool  { return $this->status === 'pending'; }
     public function isRejected(): bool { return $this->status === 'rejected'; }
 
+    public function company()
+    {
+        return $this->belongsTo(\App\Models\Company::class, 'company_id');
+    }
+
     //ID do dono dos dados
     public function ownerId(): int
     {
         return $this->owner_id ?? $this->id;
     }
 
-    //admin deste funcionário
+    //Dono do funcionario
     public function owner()
     {
         return $this->belongsTo(User::class, 'owner_id');
@@ -77,9 +82,8 @@ class User extends Authenticatable
         return $this->hasMany(User::class, 'owner_id');
     }
 
-    //Permissões
 
-    // O funcionário naõ pode acessar a aba, Admin sempre pode
+    //premissões defuncionário
     public function hasPermission(string $aba): bool
     {
         if ($this->isAdmin()) {
@@ -88,7 +92,7 @@ class User extends Authenticatable
         return in_array($aba, $this->permissions ?? [], true);
     }
 
-    //Primeira aba liberada redireciona funcionário sem acesso ao dashboard
+    //primeira aba liberada
     public function firstAllowedAba(): ?string
     {
         if ($this->isAdmin()) {
@@ -101,7 +105,6 @@ class User extends Authenticatable
         }
         return null;
     }
-
     public function products()
     {
         return $this->hasMany(Product::class);

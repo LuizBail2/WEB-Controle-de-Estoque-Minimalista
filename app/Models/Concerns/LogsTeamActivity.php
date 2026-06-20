@@ -4,18 +4,18 @@ namespace App\Models\Concerns;
 
 use App\Models\ActivityLog;
 use App\Models\User;
+use App\Mail\TeamActivityMail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
-//notifica o admin por e-mail quando um funcionario cria/edita/exclui um registro. Ações do próprio admin não vão geram log.
-
+// Notifica o admin por e-mail quando um funcionário cria/edita/exclui um registro.
 trait LogsTeamActivity
 {
     protected static function bootLogsTeamActivity(): void
     {
         static::created(function ($model) { $model->logTeamActivity('criou'); });
         static::updated(function ($model) {
-            //alteração só do estoque, vinda de uma movimentação,
+            // Alteração só do estoque, vinda de uma movimentação, não gera log.
             $changed = array_keys($model->getChanges());
             $ignore  = ['quantity', 'updated_at'];
             if (count(array_diff($changed, $ignore)) === 0) {
@@ -33,12 +33,16 @@ trait LogsTeamActivity
         }
         $user = Auth::user();
         if ($user->isAdmin()) {
-            return; //só registram ações de funcionários
+            return; // Só registramos ações de funcionários.
         }
 
         $subject = $this->activitySubject();
-        $name    = $this->activityName();
-        $desc    = trim("{$user->name} {$action} {$subject}" . ($name !== '' ? ": {$name}" : ''));
+        // Se o model define um nome de exibição customizado (ex.: Movement usa o
+        // tipo "Saída" em vez do id), usa ele; senão cai no padrão genérico.
+        $name = method_exists($this, 'activityDisplayName')
+            ? $this->activityDisplayName()
+            : $this->activityName();
+        $desc = trim("{$user->name} {$action} {$subject}" . ($name !== '' ? ": {$name}" : ''));
 
         try {
             ActivityLog::create([
@@ -51,12 +55,23 @@ trait LogsTeamActivity
 
             $owner = User::find($user->ownerId());
             if ($owner && !empty($owner->email)) {
-                Mail::raw($desc, function ($msg) use ($owner) {
-                    $msg->to($owner->email)->subject('StockPro — atividade da equipe');
-                });
+                // Pergunta ao próprio model se ele tem dados ricos para o e-mail.
+                // Movement responde com os campos detalhados; os demais retornam null.
+                $details = method_exists($this, 'activityMailDetails')
+                    ? $this->activityMailDetails()
+                    : null;
+
+                Mail::to($owner->email)->send(new TeamActivityMail(
+                    actorName:    $user->name,
+                    action:       $action,
+                    subjectLabel: $subject,
+                    itemName:     $name,
+                    details:      $details,
+                    model:        $this
+                ));
             }
         } catch (\Throwable $e) {
-            //Log/e-mail nunca pode quebra a ação do usuário
+            // Log/e-mail nunca pode quebrar a ação do usuário.
             report($e);
         }
     }

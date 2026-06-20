@@ -217,12 +217,7 @@ class ProductController extends Controller
     }
 
     private function suppliers()
-    {
-        //fornecedores cadastrados
-        $cadastrados = Supplier::orderBy('name')->pluck('name');
-        $emProdutos  = Product::whereNotNull('supplier')->where('supplier', '!=', '')
-            ->distinct()->pluck('supplier');
-
-        return $cadastrados->merge($emProdutos)->unique()->sort()->values();
-    }
+{
+    return Supplier::orderBy('name')->pluck('name');
+}
 }

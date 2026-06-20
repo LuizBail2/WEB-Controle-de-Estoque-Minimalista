@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToUser;
 use App\Models\Concerns\LogsTeamActivity;
 
 use Illuminate\Database\Eloquent\Model;
 
 class Receivable extends Model
 {
-    use LogsTeamActivity;
+    use BelongsToUser, LogsTeamActivity;
     // Eloquent mapeia contas a receber automaticamente
 
     protected $fillable = [

@@ -44,9 +44,15 @@ class MovementController extends Controller
         }
 
         $movements = $query->paginate(10)->withQueryString();
-        $products = Product::select('id', 'name', 'quantity', 'code', 'category', 'supplier', 'location')
-            ->orderBy('name')->get();
 
+        // Seletor de produtos do formulário de movimentação.
+        // Movimentação não usa fornecedor/localização — colunas removidas do select.
+        $products = Product::select('id', 'name', 'quantity', 'code', 'category', 'supplier', 'location')
+    ->with(['batches' => function ($q) {
+        $q->where('quantity', '>', 0)->orderBy('expiry_date');
+    }])
+    ->orderBy('name')->get();
+    
         $monthStart = now()->copy()->startOfMonth();
         $monthEnd   = now()->copy()->endOfMonth();
         $lastMonthStart = now()->copy()->subMonth()->startOfMonth();
@@ -477,7 +483,7 @@ class MovementController extends Controller
     }
 
     // Baixa de estoque por lote no método FEFO ele consome dos lotes que vencem primeiro. Se produto não tiver lotes cadastrados, retorna vazio.
-    
+
     private function consumeBatchesFefo(int $productId, int $qty, ?string $preferredLote = null): array
     {
         $remaining = $qty;

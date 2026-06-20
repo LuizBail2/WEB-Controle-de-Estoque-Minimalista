@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToUser;
 use App\Models\Concerns\LogsTeamActivity;
-
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 class Batch extends Model
 {
-    use LogsTeamActivity;
+    use BelongsToUser, LogsTeamActivity;
+
     protected $fillable = [
         'product_id', 'lote', 'expiry_date', 'quantity', 'entry_date', 'note',
     ];
@@ -26,13 +27,13 @@ class Batch extends Model
         return $this->belongsTo(Product::class);
     }
 
-    //Dias até vencer
+    // Dias até vencer
     public function getDaysLeftAttribute(): int
     {
         return (int) Carbon::today()->diffInDays(Carbon::parse($this->expiry_date)->startOfDay(), false);
     }
 
-    //Status
+    // Status
     public function getStatusAttribute(): string
     {
         $d = $this->days_left;
@@ -43,7 +44,7 @@ class Batch extends Model
         return 'ok';
     }
 
-    //consideram apenas lotes com quantidade
+    // Consideram apenas lotes com quantidade
     public function scopeComEstoque($q) { return $q->where('quantity', '>', 0); }
 
     public function scopeVencidos($q)
@@ -51,7 +52,7 @@ class Batch extends Model
         return $q->where('quantity', '>', 0)->whereDate('expiry_date', '<', Carbon::today());
     }
 
-    //Vencem dentro de N dias
+    // Vencem dentro de N dias
     public function scopeVenceEm($q, int $dias)
     {
         return $q->where('quantity', '>', 0)

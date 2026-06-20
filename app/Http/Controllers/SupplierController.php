@@ -12,7 +12,7 @@ class SupplierController extends Controller
 {
     public function index(Request $request)
     {
-        //fornecedor como texto
+        // Contagem de produtos por fornecedor (texto): casa products.supplier com suppliers.name.
         $counts = Product::selectRaw('supplier, COUNT(*) as total')
             ->whereNotNull('supplier')->where('supplier', '!=', '')
             ->groupBy('supplier')->pluck('total', 'supplier');

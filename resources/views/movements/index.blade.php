@@ -14,7 +14,6 @@
     </div>
 
     <div class="sp-actions">
-      {{-- você pode criar a rota depois --}}
       <a href="{{ route('movements.export', request()->only(['type','product_id','q','date_from','date_to'])) }}" class="btn btn-outline-light btn-sm">📥 Exportar CSV</a>
 
       <button type="button"
@@ -125,7 +124,6 @@
   </form>
 
   <style>
-    /* faz o seletor de data nativo aparecer no tema escuro */
     .sp-date{  }
   </style>
 
@@ -233,7 +231,6 @@
         <div class="mb-3">
           <label class="form-label sp-modal-label">Tipo de Movimentação</label>
 
-          {{-- select escondido (é o que vai pro backend) --}}
           <select id="movType" name="type" class="form-select d-none" required>
             <option value="entrada" {{ old('type')=='entrada' ? 'selected' : '' }}>Entrada</option>
             <option value="saida" {{ old('type')=='saida' ? 'selected' : '' }}>Saída</option>
@@ -273,6 +270,7 @@
                       data-category="{{ $p->category }}"
                       data-supplier="{{ $p->supplier }}"
                       data-location="{{ $p->location }}"
+                      data-batches="{{ $p->batches->map(fn($b) => ['lote' => $b->lote, 'validade' => optional($b->expiry_date)->format('d/m/Y'), 'qtd' => $b->quantity])->toJson() }}"
                       {{ old('product_id') == $p->id ? 'selected' : '' }}>
                 {{ $p->name }}{{ $p->code ? ' ('.$p->code.')' : '' }} — {{ $p->quantity }} em estoque
               </option>
@@ -290,20 +288,17 @@
 
         {{-- QTD / VALOR / CAMPOS POR TIPO --}}
         <div class="row g-3">
-          {{-- Quantidade (entrada / saida / transferencia / devolucao) --}}
           <div class="col-12 col-md-6" id="fieldQty">
             <label class="form-label sp-modal-label">Quantidade</label>
             <input id="movQty" name="quantity" type="number" min="1" class="form-control sp-modal-input" value="{{ old('quantity', 1) }}">
           </div>
 
-          {{-- Quantidade real contada (ajuste = acerto de inventário) --}}
           <div class="col-12 col-md-6" id="fieldReal" style="display:none;">
             <label class="form-label sp-modal-label">Quantidade real contada</label>
             <input id="movReal" name="real_quantity" type="number" min="0" class="form-control sp-modal-input" value="{{ old('real_quantity') }}">
             <small id="movRealHint" class="mov-hint">Estoque atual no sistema: —</small>
           </div>
 
-          {{-- Valor unitário (escondido no ajuste) --}}
           <div class="col-12 col-md-6" id="fieldValor">
             <label class="form-label sp-modal-label">Valor unitário (R$)</label>
             <input name="unit_price" type="number" step="0.01" min="0" class="form-control sp-modal-input" placeholder="0,00" value="{{ old('unit_price') }}">
@@ -349,6 +344,12 @@
               <label class="form-label sp-modal-label">Validade</label>
               <input id="movBatchExpiry" name="batch_expiry" type="date" class="form-control sp-modal-input" value="{{ old('batch_expiry') }}">
             </div>
+
+            {{-- LOTES DISPONÍVEIS (informativo + clicável) --}}
+            <div class="col-12" id="loteDisponiveisWrap" style="display:none;">
+              <div class="lote-disp-title">Lotes disponíveis (clique para preencher):</div>
+              <div id="loteDisponiveis" class="lote-disp-list"></div>
+            </div>
           </div>
           <small class="mov-hint" id="loteHintIn">Informe a validade para registrar este estoque como lote — aparece em Validades.</small>
           <small class="mov-hint" id="loteHintOut" style="display:none;">Deixe vazio para baixa automática (vence primeiro). Ou informe um lote específico para baixar dele.</small>
@@ -393,6 +394,14 @@
   .mov-badge-rej{ display:inline-block; padding:3px 9px; border-radius:999px; font-size:11px; font-weight:700; background:rgba(239,68,68,.15); color:#ef4444; }
   .mov-reversed td{ opacity:.5; text-decoration:line-through; }
   .mov-reversed .mov-badge-rev{ text-decoration:none; opacity:1; }
+
+  /* Lotes disponíveis (seletor clicável) */
+  .lote-disp-title{ font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; color:var(--t-muted); margin:4px 0 6px; }
+  .lote-disp-list{ display:flex; flex-wrap:wrap; gap:8px; }
+  .lote-chip{ cursor:pointer; padding:6px 10px; border-radius:8px; border:1px solid var(--t-border); background:var(--t-panel-2); color:var(--t-text); font-size:.8rem; transition:.15s; }
+  .lote-chip:hover{ border-color:#7c5cfc; color:#a78bfa; }
+  .lote-chip small{ color:var(--t-muted); margin-left:4px; }
+  .lote-chip.is-picked{ border-color:#7c5cfc; background:rgba(124,92,252,.15); color:#a78bfa; }
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -404,7 +413,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const warn = document.getElementById('movStockWarn');
   const submitBtn = document.querySelector('#movModal button[type="submit"]');
 
-  // Campos por tipo
   const fieldQty     = document.getElementById('fieldQty');
   const fieldReal    = document.getElementById('fieldReal');
   const fieldValor   = document.getElementById('fieldValor');
@@ -420,6 +428,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const movDirection = document.getElementById('movDirection');
   const movReason    = document.getElementById('movReason');
   const movRealHint  = document.getElementById('movRealHint');
+
+  // Lotes disponíveis
+  const loteWrap = document.getElementById('loteDisponiveisWrap');
+  const loteList = document.getElementById('loteDisponiveis');
+  const inpLote  = document.getElementById('movBatchLote');
 
   function _show(el, on){ if (el) el.style.display = on ? '' : 'none'; }
   function _req(el, on){ if (el){ if (on) el.setAttribute('required','required'); else el.removeAttribute('required'); } }
@@ -474,7 +487,29 @@ document.addEventListener('DOMContentLoaded', () => {
     if (movInfo) movInfo.style.display = 'grid';
   }
 
-  // Aviso instantaneo: bloqueia saida/transferencia maior que o estoque
+  // Lista os lotes disponíveis do produto selecionado (informativo + clicável)
+  function fillBatches(){
+    const opt = selProduct && selProduct.selectedOptions[0];
+    if (!loteWrap || !loteList) return;
+    loteList.innerHTML = '';
+    let batches = [];
+    try { batches = JSON.parse((opt && opt.dataset.batches) || '[]'); } catch(e){ batches = []; }
+    if (!opt || !opt.value || batches.length === 0){ loteWrap.style.display = 'none'; return; }
+    batches.forEach(function(b){
+      const chip = document.createElement('div');
+      chip.className = 'lote-chip';
+      const nome = b.lote || '(sem rótulo)';
+      chip.innerHTML = nome + ' <small>val: ' + (b.validade || '—') + ' · ' + b.qtd + ' un.</small>';
+      chip.addEventListener('click', function(){
+        if (inpLote) inpLote.value = b.lote || '';
+        loteList.querySelectorAll('.lote-chip').forEach(function(c){ c.classList.remove('is-picked'); });
+        chip.classList.add('is-picked');
+      });
+      loteList.appendChild(chip);
+    });
+    loteWrap.style.display = 'block';
+  }
+
   function checkStock(){
     const type = selectType.value;
     const isOut = (type === 'saida' || type === 'transferencia');
@@ -486,7 +521,7 @@ document.addEventListener('DOMContentLoaded', () => {
       block = true;
       if (warn){
         warn.style.display = 'block';
-        warn.textContent = 'Estoque insuficiente: ha apenas ' + stock + ' unidade(s) disponivel(is). Reduza a quantidade.';
+        warn.textContent = 'Estoque insuficiente: há apenas ' + stock + ' unidade(s) disponível(is). Reduza a quantidade.';
       }
       inpQty && inpQty.classList.add('is-invalid');
     } else {
@@ -518,7 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   modal?.addEventListener('show.bs.modal', (event) => {
     const btn = event.relatedTarget;
-    if (!btn) return; // reabertura programatica nao sobrescreve o tipo
+    if (!btn) return;
     const type = btn.getAttribute('data-mov-type') || 'entrada';
     setType(type);
   });
@@ -527,13 +562,14 @@ document.addEventListener('DOMContentLoaded', () => {
   selectType?.addEventListener('change', () => setType(selectType.value));
   selProduct?.addEventListener('change', checkStock);
   selProduct?.addEventListener('change', fillProductInfo);
+  selProduct?.addEventListener('change', fillBatches);
   selProduct?.addEventListener('change', updateRealHint);
   fillProductInfo();
+  fillBatches();
   inpQty?.addEventListener('input', checkStock);
 
   applyTypeUI((selectType && selectType.value) || 'entrada');
 
-  // Se o servidor recusou (estoque insuficiente), reabre o modal com os dados
   @if($errors->any() && old('type'))
     setType(@json(old('type')));
     checkStock();

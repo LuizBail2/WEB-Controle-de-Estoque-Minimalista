@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Company;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
@@ -18,37 +20,102 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:250',
-            'email' => 'required|email|max:250|unique:users,email',
-            'password' => 'required|string|min:6|confirmed',
-        ]);
+        $mode = $request->input('mode') === 'join' ? 'join' : 'create';
 
-        //admin principal, primeiro usuário sem dono.
-        $admin = User::whereNull('owner_id')->orderBy('id')->first();
-        $isFirstUser = is_null($admin);
+        $rules = [
+            'name'         => 'required|string|max:250',
+            'email'        => 'required|email|max:250|unique:users,email',
+            'password'     => 'required|string|min:6|confirmed',
+            'company_name' => 'required|string|max:250',
+        ];
+
+        if ($mode === 'create') {
+            // Normaliza o CNPJ para SÓ dígitos ANTES de validar.
+            // Sem isso o unique compararia "11.111.111/1111-11" (com máscara)
+            // contra o valor salvo no banco (só dígitos) e nunca acharia duplicata.
+            if ($request->filled('cnpj')) {
+                $request->merge([
+                    'cnpj' => preg_replace('/\D/', '', (string) $request->input('cnpj')),
+                ]);
+            }
+
+            // CNPJ obrigatório só para quem cria a empresa + único na tabela companies
+            $rules['cnpj'] = [
+                'required',
+                'string',
+                function ($attr, $value, $fail) {
+                    if (strlen((string) $value) !== 14) {
+                        $fail('Informe um CNPJ válido (14 dígitos).');
+                    }
+                },
+                Rule::unique('companies', 'cnpj'),
+            ];
+
+            // Nome da empresa único SÓ ao criar.
+            // (No modo "join" o nome PRECISA existir, então não pode ter unique lá.)
+            $rules['company_name'] = ['required', 'string', 'max:250', Rule::unique('companies', 'name')];
+        }
+
+        $messages = [
+            'email.unique'        => 'Este e-mail já está em uso.',
+            'cnpj.unique'         => 'Já existe uma empresa cadastrada com esse CNPJ.',
+            'company_name.unique' => 'Já existe uma empresa com esse nome. Para entrar nela, use a opção "Entrar numa empresa".',
+        ];
+
+        $data = $request->validate($rules, $messages);
+
+        //cria = dono
+        if ($mode === 'create') {
+            $user = User::create([
+                'name'        => $data['name'],
+                'email'       => $data['email'],
+                'password'    => Hash::make($data['password']),
+                'owner_id'    => null,
+                'status'      => 'active',
+                'permissions' => null,
+            ]);
+
+            $company = Company::create([
+                'name'          => $data['company_name'],
+                'cnpj'          => preg_replace('/\D/', '', $data['cnpj']),
+                'owner_user_id' => $user->id,
+                'plan'          => 'free',
+                'status'        => 'active',
+            ]);
+
+            $user->company_id = $company->id;
+            $user->save();
+
+            $user->sendEmailVerificationNotification();
+
+            return redirect()->route('verification.notice')->with('verify_email', $user->email);
+        }
+
+        //entrar na empres-funcionario
+        $company = Company::whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower(trim($data['company_name']))])->first();
+
+        if (!$company) {
+            return back()
+                ->withErrors(['company_name' => 'Empresa não encontrada. Confira o nome exatamente como o administrador cadastrou.'])
+                ->withInput();
+        }
 
         $user = User::create([
             'name'        => $data['name'],
             'email'       => $data['email'],
             'password'    => Hash::make($data['password']),
-
-            //1º usuário do sistema vira o admin
-            'owner_id'    => $isFirstUser ? null : $admin->id,
-            'status'      => $isFirstUser ? 'active' : 'pending',
-            'permissions' => $isFirstUser ? null : [],
+            'owner_id'    => $company->owner_user_id, //funcionário do dono da empresa
+            'company_id'  => $company->id,
+            'status'      => 'pending',               //aguarda aprovação do admin
+            'permissions' => [],
         ]);
 
-        //caso especial: o primeiro usuário do sistema é o admin, entra direto.
-        if ($isFirstUser) {
-            Auth::login($user);
-            return redirect()->route('dashboard')->with('success', 'Conta criada com sucesso.');
-        }
+        $user->sendEmailVerificationNotification();
 
-        //avisa o admin e manda o usuário pra tela de espera.
-        $this->notifyAdminNewSignup($user, $admin);
+        $owner = User::find($company->owner_user_id);
+        $this->notifyAdminNewSignup($user, $owner);
 
-        return redirect()->route('register.pending');
+        return redirect()->route('verification.notice')->with('verify_email', $user->email);
     }
 
     public function showPending()
@@ -71,7 +138,17 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $user = Auth::user();
 
-            //tela dizendo que ainda não foi aprovado.
+            //1e-mail precisa estar confirmado
+            if (!$user->hasVerifiedEmail()) {
+                $email = $user->email;
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                $request->session()->flash('verify_email', $email);
+                return redirect()->route('verification.notice');
+            }
+
+            //2funcionário precisa estar aprovado
             if ($user->isPending()) {
                 Auth::logout();
                 $request->session()->invalidate();

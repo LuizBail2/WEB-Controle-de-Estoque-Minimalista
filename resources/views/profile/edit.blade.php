@@ -76,10 +76,18 @@
                     <div class="pf-act__meta">{{ $su->email }} · cadastrou-se {{ $su->created_at->diffForHumans() }}</div>
                 </div>
                 <div class="pf-po__actions">
-                    <form method="POST" action="{{ route('profile.signups.approve', $su) }}" style="margin:0;">@csrf
+                    <form method="POST" action="{{ route('profile.signups.approve', $su) }}" style="margin:0;"
+                          data-confirm data-confirm-kind="approve"
+                          data-confirm-title="Aprovar cadastro?"
+                          data-confirm-text="Liberar o acesso de {{ $su->name }}? A pessoa será avisada por e-mail."
+                          data-confirm-btn="Aprovar">@csrf
                         <button type="submit" class="btn btn-success pf-act-readbtn">✓ Aprovar</button>
                     </form>
-                    <form method="POST" action="{{ route('profile.signups.reject', $su) }}" style="margin:0;" onsubmit="return confirm('Recusar o cadastro de {{ $su->name }}? O cadastro será removido.')">@csrf
+                    <form method="POST" action="{{ route('profile.signups.reject', $su) }}" style="margin:0;"
+                          data-confirm data-confirm-kind="danger"
+                          data-confirm-title="Recusar cadastro?"
+                          data-confirm-text="Recusar o cadastro de {{ $su->name }}? O cadastro será removido."
+                          data-confirm-btn="Recusar">@csrf
                         <button type="submit" class="btn pf-btn-del pf-act-readbtn">✕ Recusar</button>
                     </form>
                 </div>
@@ -130,7 +138,11 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Salvar alterações</button>
                 </form>
-                <form method="POST" action="{{ route('profile.employees.destroy', $emp) }}" onsubmit="return confirm('Remover o funcionário {{ $emp->name }}?')" class="pf-emp-del">
+                <form method="POST" action="{{ route('profile.employees.destroy', $emp) }}" class="pf-emp-del"
+                      data-confirm data-confirm-kind="danger"
+                      data-confirm-title="Remover funcionário?"
+                      data-confirm-text="Remover o funcionário {{ $emp->name }}? Esta ação não pode ser desfeita."
+                      data-confirm-btn="Remover">
                     @csrf @method('DELETE')
                     <button type="submit" class="btn pf-btn-del">🗑 Remover funcionário</button>
                 </form>
@@ -153,10 +165,18 @@
                 </div>
                 <div class="pf-po__actions">
                     <a href="{{ route('purchase-orders.report', $po) }}" target="_blank" class="btn btn-secondary pf-act-readbtn">📄 PDF</a>
-                    <form method="POST" action="{{ route('purchase-orders.approve', $po) }}" style="margin:0;">@csrf
+                    <form method="POST" action="{{ route('purchase-orders.approve', $po) }}" style="margin:0;"
+                          data-confirm data-confirm-kind="approve"
+                          data-confirm-title="Aprovar pedido?"
+                          data-confirm-text="Aprovar o pedido {{ $po->code }}? O funcionário poderá dar entrada no estoque."
+                          data-confirm-btn="Aprovar">@csrf
                         <button type="submit" class="btn btn-success pf-act-readbtn">✓ Aprovar</button>
                     </form>
-                    <form method="POST" action="{{ route('purchase-orders.reject', $po) }}" style="margin:0;" onsubmit="return confirm('Rejeitar o pedido {{ $po->code }}?')">@csrf
+                    <form method="POST" action="{{ route('purchase-orders.reject', $po) }}" style="margin:0;"
+                          data-confirm data-confirm-kind="danger"
+                          data-confirm-title="Rejeitar pedido?"
+                          data-confirm-text="Rejeitar o pedido {{ $po->code }}?"
+                          data-confirm-btn="Rejeitar">@csrf
                         <button type="submit" class="btn pf-btn-del pf-act-readbtn">✕ Rejeitar</button>
                     </form>
                 </div>
@@ -185,10 +205,18 @@
                 </div>
                 <div class="pf-po__actions">
                     <a href="{{ route('movements.document', $mv) }}" target="_blank" class="btn btn-secondary pf-act-readbtn">📄 PDF</a>
-                    <form method="POST" action="{{ route('movements.approve', $mv) }}" style="margin:0;">@csrf
+                    <form method="POST" action="{{ route('movements.approve', $mv) }}" style="margin:0;"
+                          data-confirm data-confirm-kind="approve"
+                          data-confirm-title="Aprovar movimentação?"
+                          data-confirm-text="Aprovar esta movimentação? O estoque será atualizado agora."
+                          data-confirm-btn="Aprovar">@csrf
                         <button type="submit" class="btn btn-success pf-act-readbtn">✓ Aprovar</button>
                     </form>
-                    <form method="POST" action="{{ route('movements.reject', $mv) }}" style="margin:0;" onsubmit="return confirm('Rejeitar esta movimentação?')">@csrf
+                    <form method="POST" action="{{ route('movements.reject', $mv) }}" style="margin:0;"
+                          data-confirm data-confirm-kind="danger"
+                          data-confirm-title="Rejeitar movimentação?"
+                          data-confirm-text="Rejeitar esta movimentação?"
+                          data-confirm-btn="Rejeitar">@csrf
                         <button type="submit" class="btn pf-btn-del pf-act-readbtn">✕ Rejeitar</button>
                     </form>
                 </div>
@@ -221,6 +249,19 @@
             <p class="pf-team__empty">Nenhuma notificação ainda.</p>
         @endforelse
     </div>
+</div>
+
+{{-- ===== MODAL DE CONFIRMAÇÃO (genérico, atende todos os forms com data-confirm) ===== --}}
+<div class="cf-overlay" id="cfOverlay">
+  <div class="cf-box">
+    <div class="cf-ico" id="cfIco">?</div>
+    <h5 class="cf-title" id="cfTitle">Confirmar ação?</h5>
+    <p class="cf-text" id="cfText">Tem certeza que deseja continuar?</p>
+    <div class="cf-actions">
+      <button type="button" class="cf-btn cf-btn-ghost" id="cfCancel">Cancelar</button>
+      <button type="button" class="cf-btn cf-btn-confirm" id="cfConfirm">Confirmar</button>
+    </div>
+  </div>
 </div>
 
 <style>
@@ -271,5 +312,63 @@
     .pf-act__meta{ color:var(--t-muted); font-size:.76rem; margin-top:2px; }
 
     @media (max-width: 760px){ .pf-grid{ grid-template-columns:1fr; } }
+
+    /* ===== Modal de confirmação ===== */
+    .cf-overlay{ position:fixed; inset:0; background:rgba(8,12,22,.55); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; z-index:3000; }
+    .cf-overlay.open{ display:flex; }
+    .cf-box{ background:var(--t-panel-2, #0b1220); border:1px solid var(--t-border, rgba(255,255,255,.12)); border-radius:18px; padding:26px 24px; max-width:420px; width:92%; text-align:center; color:var(--t-text, #e5e7eb); box-shadow:0 30px 60px rgba(0,0,0,.5); }
+    .cf-ico{ width:54px; height:54px; margin:0 auto 12px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:800; }
+    .cf-title{ font-weight:800; margin:0 0 8px; font-size:1.05rem; }
+    .cf-text{ color:var(--t-muted, #94a3b8); font-size:.9rem; margin:0 0 20px; line-height:1.5; }
+    .cf-actions{ display:flex; gap:10px; justify-content:center; }
+    .cf-btn{ padding:9px 18px; border-radius:12px; font-weight:700; font-size:.9rem; cursor:pointer; border:1px solid var(--t-input-border, rgba(255,255,255,.14)); transition:filter .15s ease; }
+    .cf-btn:hover{ filter:brightness(1.08); }
+    .cf-btn-ghost{ background:var(--t-panel, #111827); color:var(--t-text, #e5e7eb); }
+    .cf-btn-confirm{ color:#fff; border:none; }
+    .cf-overlay[data-kind="approve"] .cf-ico{ background:rgba(34,197,94,.18); color:#22c55e; }
+    .cf-overlay[data-kind="approve"] .cf-btn-confirm{ background:#16a34a; }
+    .cf-overlay[data-kind="danger"]  .cf-ico{ background:rgba(239,68,68,.18); color:#ef4444; }
+    .cf-overlay[data-kind="danger"]  .cf-btn-confirm{ background:#dc2626; }
 </style>
+
+<script>
+(function(){
+  var overlay = document.getElementById('cfOverlay');
+  var titleEl = document.getElementById('cfTitle');
+  var textEl  = document.getElementById('cfText');
+  var icoEl   = document.getElementById('cfIco');
+  var btnOk   = document.getElementById('cfConfirm');
+  var btnNo   = document.getElementById('cfCancel');
+  var pendingForm = null;
+
+  function close(){ overlay.classList.remove('open'); pendingForm = null; }
+
+  function open(form){
+    pendingForm = form;
+    var kind  = form.dataset.confirmKind || 'danger';
+    overlay.setAttribute('data-kind', kind);
+    titleEl.textContent = form.dataset.confirmTitle || 'Confirmar ação?';
+    textEl.textContent  = form.dataset.confirmText  || 'Tem certeza?';
+    icoEl.textContent   = kind === 'approve' ? '✓' : '!';
+    btnOk.textContent   = form.dataset.confirmBtn || 'Confirmar';
+    overlay.classList.add('open');
+  }
+
+  document.querySelectorAll('form[data-confirm]').forEach(function(form){
+    form.addEventListener('submit', function(e){
+      if (form.dataset.confirmed === '1') return;
+      e.preventDefault();
+      open(form);
+    });
+  });
+
+  btnOk.addEventListener('click', function(){
+    if (pendingForm){ pendingForm.dataset.confirmed = '1'; pendingForm.submit(); }
+  });
+  btnNo.addEventListener('click', close);
+  overlay.addEventListener('click', function(e){ if (e.target === overlay) close(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
+})();
+</script>
 @endsection
+

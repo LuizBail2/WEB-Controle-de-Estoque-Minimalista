@@ -112,6 +112,37 @@
 </div>
 
 <style>
+
+    [data-theme="light"] .finance .table-dark,
+[data-theme="light"] .finance .table-dark > :not(caption) > * > *{
+  --bs-table-bg: var(--t-panel);
+  --bs-table-color: var(--t-text);
+  --bs-table-border-color: var(--t-border);
+  background-color: var(--t-panel) !important;
+  color: var(--t-text) !important;
+}
+
+/* Cabeçalho da tabela um tom diferente pra separar */
+[data-theme="light"] .finance .table-dark thead th{
+  background-color: var(--t-panel-2) !important;
+  color: var(--t-text-soft) !important;
+}
+
+/* Hover das linhas no claro */
+[data-theme="light"] .finance .table-hover > tbody > tr:hover > *{
+  background-color: var(--t-hover) !important;
+  color: var(--t-text) !important;
+}
+
+/* Botões outline-light (Fluxo de caixa, Contas a pagar...) ficam invisíveis no claro */
+[data-theme="light"] .finance .btn-outline-light{
+  color: var(--t-text) !important;
+  border-color: var(--t-input-border) !important;
+}
+[data-theme="light"] .finance .btn-outline-light:hover{
+  background: var(--t-hover) !important;
+}
+
     /* Coluna do olho só no mobile */
     .fin-eye{ display:none; }
     .fin-eye-btn{ width:34px; height:34px; border-radius:9px; background: var(--t-panel-2); border:1px solid var(--t-input-border); color: var(--t-text); cursor:pointer; font-size:14px; }

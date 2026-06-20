@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\BatchController;
 use App\Http\Controllers\FinanceController;
@@ -25,6 +26,11 @@ use Illuminate\Support\Facades\Route;
     Route::post('/forgot-password',       [ForgotPasswordController::class, 'sendResetLink'])->name('password.email');
     Route::get('/reset-password/{token}', [ForgotPasswordController::class, 'showReset'])->name('password.reset');
     Route::post('/reset-password',        [ForgotPasswordController::class, 'resetPassword'])->name('password.update');
+    //verificação
+    Route::get('/email/verify', [EmailVerificationController::class, 'notice'])->name('verification.notice');
+    Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])->middleware('signed')->name('verification.verify');
+    Route::post('/email/resend', [EmailVerificationController::class, 'resend'])->name('verification.resend');
+
     
 
 Route::middleware(['auth', 'aba.perm'])->group(function () {
