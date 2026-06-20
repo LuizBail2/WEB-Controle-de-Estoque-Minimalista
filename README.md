@@ -5,7 +5,7 @@
 <h1 align="center">Nexo Estoque</h1>
 
 <p align="center">
-  Sistema web de controle de estoque para pequenos comércios — cadastro de produtos,
+  Sistema web de controle de estoque para pequenos/médios comércios — cadastro de empresa/funcionario, cadastro de produtos,
   movimentações, pedidos de compra, validade de lotes, financeiro, relatórios e equipe com permissões.
 </p>
 
@@ -39,7 +39,7 @@
 
 ## 📦 Sobre
 
-O **Nexo Estoque** é um sistema web feito para pequenos comerciantes terem controle total do
+O **Nexo Estoque** é um sistema web feito para pequenos/médios comerciantes ou estabelecimentos terem controle total do
 estoque dos seus produtos: o que entra, o que sai, o que está acabando e o que está vencendo.
 Tem painel com indicadores, controle de equipe com permissões por aba, fluxo de aprovação de
 pedidos e movimentações, relatórios em PDF/CSV e tema claro/escuro.
