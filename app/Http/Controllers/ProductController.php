@@ -8,6 +8,7 @@ use App\Models\Supplier;
 use App\Models\Batch;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class ProductController extends Controller
 {
@@ -79,6 +80,14 @@ class ProductController extends Controller
             'batch_expiry'   => 'nullable|date',
             'batch_quantity' => 'nullable|integer|min:1',
         ]);
+
+        // Regra (Opção C): se há lote inicial, sua quantidade não pode passar do estoque do produto.
+        $this->ensureBatchFitsStock(
+            stock: (int) $data['quantity'],
+            existingBatchesQty: 0,
+            newBatchQty: $request->filled('batch_quantity') ? (int) $request->input('batch_quantity') : 0
+        );
+
         if (empty($data['code'])) $data['code'] = null;
         if (!empty($data['category'])) Category::firstOrCreate(['name' => $data['category']]);
         if (!empty($data['supplier'])) Supplier::firstOrCreate(['name' => $data['supplier']]);
@@ -151,6 +160,29 @@ class ProductController extends Controller
             'batch_expiry'   => 'nullable|date',
             'batch_quantity' => 'nullable|integer|min:1',
         ]);
+
+        // Soma dos lotes JÁ existentes (com saldo) deste produto.
+        $existingBatchesQty = (int) Batch::where('product_id', $product->id)
+            ->where('quantity', '>', 0)
+            ->sum('quantity');
+
+        $newStock   = (int) $data['quantity'];
+        $newBatchQty = $request->filled('batch_quantity') ? (int) $request->input('batch_quantity') : 0;
+
+        //bloqueio escolhido): a nova quantidade não pode ficar abaixo do que já está rastreado em lotes.
+        if ($newStock < $existingBatchesQty) {
+            throw ValidationException::withMessages([
+                'quantity' => "A quantidade ({$newStock}) não pode ser menor que o total já rastreado em lotes ({$existingBatchesQty}). Ajuste os lotes em Validades antes de reduzir o estoque.",
+            ]);
+        }
+
+        //lotes existentes + lote novo não podem passar do estoque.
+        $this->ensureBatchFitsStock(
+            stock: $newStock,
+            existingBatchesQty: $existingBatchesQty,
+            newBatchQty: $newBatchQty
+        );
+
         if (empty($data['code'])) $data['code'] = null;
         if (!empty($data['category'])) Category::firstOrCreate(['name' => $data['category']]);
         if (!empty($data['supplier'])) Supplier::firstOrCreate(['name' => $data['supplier']]);
@@ -182,6 +214,24 @@ class ProductController extends Controller
     }
 
     //meu auxiliar
+    private function ensureBatchFitsStock(int $stock, int $existingBatchesQty, int $newBatchQty): void
+    {
+        if ($newBatchQty <= 0) {
+            return; //sem lote novo, nada a validar aqui
+        }
+
+        $totalComLote = $existingBatchesQty + $newBatchQty;
+
+        if ($totalComLote > $stock) {
+            $disponivel = max(0, $stock - $existingBatchesQty);
+            throw ValidationException::withMessages([
+                'batch_quantity' => "A quantidade do lote ({$newBatchQty}) faria os lotes somarem {$totalComLote}, acima do estoque ({$stock}). "
+                    . ($existingBatchesQty > 0
+                        ? "Já há {$existingBatchesQty} em lotes; você pode adicionar no máximo {$disponivel}."
+                        : "O lote não pode ser maior que o estoque."),
+            ]);
+        }
+    }
 
     private function applySort($query, string $sort): void
     {

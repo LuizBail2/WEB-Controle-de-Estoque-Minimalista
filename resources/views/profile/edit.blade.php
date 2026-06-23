@@ -127,7 +127,16 @@
                     @csrf @method('PUT')
                     <div class="pf-emp-grid">
                         <div class="pf-field"><label>Nome</label><input type="text" name="name" value="{{ $emp->name }}" required></div>
-                        <div class="pf-field"><label>E-mail</label><input type="email" name="email" value="{{ $emp->email }}" required></div>
+                        <div class="pf-field">
+                            <label>E-mail</label>
+                            {{-- E-mail mascarado por padrão + botão Editar. O input real fica oculto até clicar. --}}
+                            <div class="pf-email" data-email-wrap>
+                                <span class="pf-email__masked" data-email-mask>{{ \App\Support\Mask::email($emp->email) }}</span>
+                                <button type="button" class="pf-email__btn" data-email-edit>✏️ Editar</button>
+                                <input type="email" name="email" value="{{ $emp->email }}" required
+                                       class="pf-email__input" data-email-input hidden autocomplete="off">
+                            </div>
+                        </div>
                         <div class="pf-field"><label>Nova senha (opcional)</label><input type="password" name="password" placeholder="deixe em branco p/ manter"></div>
                     </div>
                     <div class="pf-perms">
@@ -280,6 +289,13 @@
     .pf-field input:focus{ border-color: var(--accent, #3b82f6); }
     .pf-err{ color:#ef4444; font-size:.8rem; margin-top:5px; }
 
+    /* E-mail mascarado do funcionário */
+    .pf-email{ display:flex; align-items:center; gap:8px; min-height:42px; }
+    .pf-email__masked{ font-family:monospace; letter-spacing:.04em; color:var(--t-text); background:var(--t-panel-2); border:1px solid var(--t-input-border); border-radius:10px; padding:0 12px; height:42px; display:inline-flex; align-items:center; flex:1 1 auto; }
+    .pf-email__btn{ flex:0 0 auto; font-size:.78rem; font-weight:600; padding:8px 12px; border-radius:10px; border:1px solid var(--t-input-border); background:var(--t-panel); color:var(--t-text); cursor:pointer; }
+    .pf-email__btn:hover{ background:var(--t-hover); }
+    .pf-email__input{ flex:1 1 auto; }
+
     .pf-team{ margin-top:16px; }
     .pf-team__hint{ color:var(--t-muted); font-size:.88rem; margin-bottom:16px; }
     .pf-team__empty{ color:var(--t-muted); font-size:.9rem; }
@@ -369,6 +385,21 @@
   overlay.addEventListener('click', function(e){ if (e.target === overlay) close(); });
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
 })();
+
+//E-mail do funcionário: revelar o campo
+(function(){
+  document.querySelectorAll('[data-email-wrap]').forEach(function(wrap){
+    var btn   = wrap.querySelector('[data-email-edit]');
+    var mask  = wrap.querySelector('[data-email-mask]');
+    var input = wrap.querySelector('[data-email-input]');
+    if (!btn || !mask || !input) return;
+    btn.addEventListener('click', function(){
+      mask.hidden = true;
+      btn.hidden  = true;
+      input.hidden = false;
+      input.focus();
+    });
+  });
+})();
 </script>
 @endsection
-
